@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useField } from '@unform/core';
+import * as MaterialDesign from 'react-icons/md';
 import NumberFormat from 'react-number-format';
 
-import * as MaterialDesign from 'react-icons/md';
+import { useField } from '@unform/core';
+import PropTypes from 'prop-types';
+
 import dark from '~/styles/dark';
 
 import { Wrapper } from '../styles';
@@ -36,7 +38,7 @@ export default function Number({ name, icon, ...rest }) {
           className="numberFormat"
           thousandSeparator="."
           decimalSeparator=","
-          prefix={'R$ '}
+          prefix="R$ "
           decimalScale={2}
           autoComplete="off"
           {...rest}
@@ -45,3 +47,12 @@ export default function Number({ name, icon, ...rest }) {
     </>
   );
 }
+
+Number.propTypes = {
+  name: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+};
+
+Number.defaultProps = {
+  icon: '',
+};

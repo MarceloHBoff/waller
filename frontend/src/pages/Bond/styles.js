@@ -24,3 +24,9 @@ export const AddButton = styled.button.attrs({
   border-radius: 50%;
   background: ${props => props.theme.blue};
 `;
+
+export const IconButton = styled.button.attrs({
+  type: 'button',
+})`
+  margin-right: 30px;
+`;

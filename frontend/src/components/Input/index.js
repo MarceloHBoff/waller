@@ -1,11 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
-import { Container } from './styles';
+import PropTypes from 'prop-types';
 
 import DatePicker from '~/components/Input/DatePicker';
 import NormalInput from '~/components/Input/NormalInput';
 import Number from '~/components/Input/Number';
+
+import { Container } from './styles';
 
 export default function Input({ name, money, date, children, ...rest }) {
   return (
@@ -26,14 +27,12 @@ export default function Input({ name, money, date, children, ...rest }) {
 Input.propTypes = {
   name: PropTypes.string.isRequired,
   money: PropTypes.bool,
-  percent: PropTypes.bool,
   date: PropTypes.bool,
   children: PropTypes.element,
 };
 
 Input.defaultProps = {
   money: false,
-  percent: false,
   date: false,
   children: null,
 };

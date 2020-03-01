@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 import { Form } from '@unform/web';
+import { parseISO } from 'date-fns';
+import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 
 import Button from '~/components/Button';
@@ -13,17 +15,10 @@ import { openModalBond } from '~/store/modules/modal/actions';
 
 import { Container } from './styles';
 
-export default function Accept({ data }) {
+export default function Accept({ dataBond }) {
   const formRef = useRef(null);
   const open = useSelector(state => state.modal.openModalBond);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (open) {
-      console.tron.log(data);
-      formRef.current.setData(data);
-    }
-  }, [open]);
 
   async function handleSave(data) {
     try {
@@ -32,7 +27,7 @@ export default function Accept({ data }) {
       const schema = Yup.object().shape({
         title: Yup.string().required('Title is required'),
         value: Yup.string().required('Value is required'),
-        dueDate: Yup.date().required('Due Date is required'),
+        dueDate: Yup.string().required('Due Date is required'),
         nowValue: Yup.string().required('Rentability is required'),
       });
 
@@ -40,7 +35,11 @@ export default function Accept({ data }) {
         abortEarly: false,
       });
 
-      await api.post('/bonds', data);
+      if (dataBond.id) {
+        await api.put(`/bonds/${dataBond.id}`, data);
+      } else {
+        await api.post('/bonds', data);
+      }
 
       dispatch(openModalBond(false));
     } catch (err) {
@@ -62,7 +61,16 @@ export default function Accept({ data }) {
     <Container>
       {open && (
         <Modal title="Bond aplication">
-          <Form ref={formRef} onSubmit={handleSave}>
+          <Form
+            ref={formRef}
+            initialData={{
+              title: dataBond.title,
+              value: dataBond.value,
+              nowValue: dataBond.nowValue,
+              dueDate: dataBond.dueDate ? parseISO(dataBond.dueDate) : '',
+            }}
+            onSubmit={handleSave}
+          >
             <Input
               name="title"
               icon="MdShortText"
@@ -95,3 +103,17 @@ export default function Accept({ data }) {
     </Container>
   );
 }
+
+Accept.propTypes = {
+  dataBond: PropTypes.shape({
+    id: PropTypes.number,
+    title: PropTypes.string,
+    value: PropTypes.number,
+    nowValue: PropTypes.number,
+    dueDate: PropTypes.string,
+  }),
+};
+
+Accept.defaultProps = {
+  dataBond: {},
+};

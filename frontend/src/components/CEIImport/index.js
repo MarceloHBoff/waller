@@ -14,15 +14,13 @@ import { openModalCEIImport } from '~/store/modules/modal/actions';
 import { Container } from './styles';
 
 export default function CEIImport() {
+  const formRef = useRef(null);
   const open = useSelector(state => state.modal.openModalCEIImport);
   const dispatch = useDispatch();
-  const formRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
 
   async function handleImport(data) {
-    setLoading(true);
-
     try {
       formRef.current.setErrors({});
 
@@ -35,13 +33,13 @@ export default function CEIImport() {
         abortEarly: false,
       });
 
+      setLoading(true);
+
       await api.post('/ceiimport', data);
 
       toast.success('Success CEI import');
       dispatch(openModalCEIImport(false));
     } catch (err) {
-      console.tron.log('aqui');
-      console.tron.log(formRef);
       const validationErrors = {};
 
       if (err instanceof Yup.ValidationError) {

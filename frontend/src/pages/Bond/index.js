@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { MdAdd, MdEdit } from 'react-icons/md';
+import React, { useEffect, useState, useCallback } from 'react';
+import { MdAdd, MdEdit, MdDelete } from 'react-icons/md';
 import Loader from 'react-loader-spinner';
 import PerfectScrollBar from 'react-perfect-scrollbar';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +14,7 @@ import { openModalBond } from '~/store/modules/modal/actions';
 import './table.css';
 
 import Accept from './Accept';
-import { Container, AddButtonWrapper, AddButton } from './styles';
+import { Container, AddButtonWrapper, AddButton, IconButton } from './styles';
 
 const headCells = [
   { id: 'title', class: 'c1', align: 'left', label: 'TITLE' },
@@ -37,45 +37,56 @@ export default function Bond() {
   const [loading, setLoading] = useState(false);
   const [totals, setTotals] = useState(0);
 
-  useEffect(() => {
-    async function loadBonds() {
-      if (openModal) return;
+  const loadBonds = useCallback(async () => {
+    if (openModal) return;
 
-      setLoading(true);
+    setData({});
+    setLoading(true);
 
-      try {
-        const response = await api.get('/bonds');
+    try {
+      const response = await api.get('/bonds');
 
-        let value = 0;
-        let nowValue = 0;
+      let value = 0;
+      let nowValue = 0;
 
-        response.data.forEach(bond => {
-          value += bond.value;
-          nowValue += bond.nowValue;
-        });
+      response.data.forEach(bond => {
+        value += bond.value;
+        nowValue += bond.nowValue;
+      });
 
-        const result = nowValue - value;
+      const result = nowValue - value;
 
-        setTotals({
-          value,
-          nowValue,
-          result,
-        });
+      setTotals({
+        value,
+        nowValue,
+        result,
+      });
 
-        setBonds(response.data);
-      } catch (err) {
-        toast.error('Connection error');
-      }
-
-      setLoading(false);
+      setBonds(response.data);
+    } catch (err) {
+      toast.error('Connection error');
     }
-    loadBonds();
+
+    setLoading(false);
   }, [openModal]);
 
+  useEffect(() => {
+    loadBonds();
+  }, [loadBonds]);
+
   function handleUpdate(id) {
-    const bond = bonds.filter(bond => bond.id === id);
+    const bond = bonds.filter(b => b.id === id);
     setData(bond[0]);
     dispatch(openModalBond(true));
+  }
+
+  async function handleDelete(id) {
+    try {
+      await api.delete(`/bonds/${id}`);
+      loadBonds();
+    } catch (err) {
+      toast.error('Connection error');
+    }
   }
 
   return (
@@ -115,9 +126,12 @@ export default function Bond() {
                       {bond.nowValue - bond.value}
                     </ColorTd>
                     <Td className="c7">
-                      <button onClick={() => handleUpdate(bond.id)}>
+                      <IconButton onClick={() => handleUpdate(bond.id)}>
                         <MdEdit size={24} color="#fff" />
-                      </button>
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(bond.id)}>
+                        <MdDelete size={24} color="#fff" />
+                      </IconButton>
                     </Td>
                   </tr>
                 ))}
@@ -150,7 +164,7 @@ export default function Bond() {
               <MdAdd size={50} color="#fff" />
             </AddButton>
           </AddButtonWrapper>
-          <Accept data={data} />
+          <Accept dataBond={data} />
         </TableContext.Provider>
       )}
     </Container>

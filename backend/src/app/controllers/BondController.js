@@ -71,6 +71,23 @@ class BondController {
 
     return res.json(bond);
   }
+
+  async delete(req, res) {
+    const bond = await Bond.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.userId,
+      },
+    });
+
+    if (!bond) {
+      return res.status(400).json({ error: 'Bond does not exist' });
+    }
+
+    bond.destroy();
+
+    return res.json({});
+  }
 }
 
 export default new BondController();

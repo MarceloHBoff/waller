@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactDatePicker from 'react-datepicker';
-import { useField } from '@unform/core';
-
 import * as MaterialDesign from 'react-icons/md';
+
+import { useField } from '@unform/core';
+import PropTypes from 'prop-types';
+
 import dark from '~/styles/dark';
 
 import { Wrapper } from '../styles';
@@ -50,3 +52,12 @@ export default function DatePicker({ name, icon, ...rest }) {
     </>
   );
 }
+
+DatePicker.propTypes = {
+  name: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+};
+
+DatePicker.defaultProps = {
+  icon: '',
+};

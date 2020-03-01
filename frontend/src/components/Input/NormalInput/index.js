@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { useField } from '@unform/core';
-
 import * as MaterialDesign from 'react-icons/md';
+
+import { useField } from '@unform/core';
+import PropTypes from 'prop-types';
+
 import dark from '~/styles/dark';
 
 import { Wrapper } from '../styles';
@@ -39,3 +41,12 @@ export default function NormalInput({ name, icon, ...rest }) {
     </>
   );
 }
+
+NormalInput.propTypes = {
+  name: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+};
+
+NormalInput.defaultProps = {
+  icon: '',
+};

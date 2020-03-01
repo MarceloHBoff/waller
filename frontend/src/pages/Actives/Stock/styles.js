@@ -32,14 +32,14 @@ export const Code = styled.div`
   h1 {
     font-size: 24px;
     line-height: 34px;
-    color: #fff;
+    color: #eee;
     font-weight: bold;
   }
 
   h3 {
     font-size: 16px;
     line-height: 26px;
-    color: #fff;
+    color: #eee;
   }
 `;
 
@@ -50,7 +50,7 @@ export const Info = styled.div`
 
   span {
     font-size: 12px;
-    color: #fff;
+    color: #eee;
     line-height: 22px;
   }
 `;
@@ -64,7 +64,7 @@ export const Data = styled.div`
   strong {
     font-size: 28px;
     line-height: 38px;
-    color: #fff;
+    color: #eee;
   }
 
   button {
@@ -84,6 +84,6 @@ export const Percent = styled.span`
     if (props.signal < 0) {
       return props.theme.red;
     }
-    return '#fff';
+    return '#eee';
   }};
 `;

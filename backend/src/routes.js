@@ -21,6 +21,7 @@ routes.get('/stocks', StockController.index);
 
 routes.post('/bonds', BondController.store);
 routes.put('/bonds/:id', BondController.update);
+routes.delete('/bonds/:id', BondController.delete);
 routes.get('/bonds', BondController.index);
 
 routes.post('/ceiimport', CeiImportController.store);

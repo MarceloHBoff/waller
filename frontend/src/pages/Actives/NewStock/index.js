@@ -9,7 +9,6 @@ import Button from '~/components/Button';
 import Input from '~/components/Input';
 import Modal from '~/components/Modal';
 import api from '~/services/api';
-
 import { openModalNewStock } from '~/store/modules/modal/actions';
 import { formatPrice } from '~/util/format';
 
@@ -27,8 +26,6 @@ export default function NewStock() {
   const { stocks, setStocks } = useContext(StockContext);
 
   async function handleAddStock(data) {
-    setLoading(true);
-
     try {
       formRef.current.setErrors({});
 
@@ -41,6 +38,8 @@ export default function NewStock() {
       await schema.validate(data, {
         abortEarly: false,
       });
+
+      setLoading(true);
 
       const response = await api.post('/stocks', data);
 

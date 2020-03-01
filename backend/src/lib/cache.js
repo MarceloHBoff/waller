@@ -7,7 +7,7 @@ class Cache {
   }
 
   set(key, value) {
-    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60 * 24);
+    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60);
   }
 
   async get(key) {
