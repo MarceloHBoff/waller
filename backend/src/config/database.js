@@ -7,7 +7,5 @@ module.exports = {
   database: 'waller',
   define: {
     timestamps: true,
-    // underscored: true,
-    // underscoredAll: true,
   },
 };

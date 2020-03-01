@@ -43,6 +43,34 @@ class BondController {
 
     return res.json(bond);
   }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      title: Yup.string().required(),
+      value: Yup.number().required(),
+      dueDate: Yup.date().required(),
+      nowValue: Yup.number().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const bond = await Bond.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.userId,
+      },
+    });
+
+    if (!bond) {
+      return res.status(400).json({ error: 'Bond does not exist' });
+    }
+
+    bond.update(req.body);
+
+    return res.json(bond);
+  }
 }
 
 export default new BondController();

@@ -20,6 +20,7 @@ routes.post('/stocks', StockController.store);
 routes.get('/stocks', StockController.index);
 
 routes.post('/bonds', BondController.store);
+routes.put('/bonds/:id', BondController.update);
 routes.get('/bonds', BondController.index);
 
 routes.post('/ceiimport', CeiImportController.store);
