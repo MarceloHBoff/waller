@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import { Form } from '@rocketseat/unform';
+import { Form } from '@unform/web';
 import * as Yup from 'yup';
 
 import logo from '~/assets/logo.png';
@@ -10,39 +10,58 @@ import Button from '~/components/Button';
 import Input from '~/components/Input';
 import { signInRequest } from '~/store/modules/auth/actions';
 
-const schema = Yup.object().shape({
-  email: Yup.string()
-    .email('Email inválido')
-    .required('Email é obrigatório'),
-  password: Yup.string().required('Senha é obrigatória'),
-});
-
 export default function SignIn() {
   const dispatch = useDispatch();
+  const formRef = useRef(null);
 
-  function handleSubmit({ email, password }) {
-    dispatch(signInRequest(email, password));
+  async function handleSubmit(data) {
+    try {
+      formRef.current.setErrors({});
+
+      const schema = Yup.object().shape({
+        email: Yup.string()
+          .email('Invalid email')
+          .required('Email is required'),
+        password: Yup.string().required('Password is required'),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      dispatch(signInRequest(data));
+    } catch (err) {
+      const validationErrors = {};
+
+      if (err instanceof Yup.ValidationError) {
+        err.inner.forEach(error => {
+          validationErrors[error.path] = error.message;
+        });
+
+        formRef.current.setErrors(validationErrors);
+      }
+    }
   }
 
   return (
     <>
-      <Form schema={schema} onSubmit={handleSubmit}>
+      <Form ref={formRef} onSubmit={handleSubmit}>
         <img src={logo} alt="logo" />
         <Input
           name="email"
-          autoFocus
           icon="MdEmail"
+          placeholder="Your email"
           type="email"
-          placeholder="Digite seu email"
+          autoFocus
         />
         <Input
           name="password"
           icon="MdLock"
+          placeholder="Your password"
           type="password"
-          placeholder="Sua senha"
         />
-        <Button type="submit">Entrar</Button>
-        <Link to="/register">Criar conta</Link>
+        <Button type="submit">SignIn</Button>
+        <Link to="/register">Create account</Link>
       </Form>
     </>
   );

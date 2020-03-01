@@ -5,7 +5,7 @@ import {
   MdPieChart,
   MdAccountBalance,
   MdViewModule,
-  MdTrendingUp,
+  // MdTrendingUp,
   MdSettings,
 } from 'react-icons/md';
 import { useDispatch } from 'react-redux';

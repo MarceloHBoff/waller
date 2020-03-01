@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-import { Form } from '@rocketseat/unform';
+import { Form } from '@unform/web';
 import * as Yup from 'yup';
 
 import Button from '~/components/Button';
@@ -13,14 +13,10 @@ import { openModalCEIImport } from '~/store/modules/modal/actions';
 
 import { Container } from './styles';
 
-const schema = Yup.object().shape({
-  cpf: Yup.string().required('CPF é obrigatório'),
-  password: Yup.string().required('Senha é obrigatória'),
-});
-
 export default function CEIImport() {
   const open = useSelector(state => state.modal.openModalCEIImport);
   const dispatch = useDispatch();
+  const formRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -28,36 +24,59 @@ export default function CEIImport() {
     setLoading(true);
 
     try {
+      formRef.current.setErrors({});
+
+      const schema = Yup.object().shape({
+        cpf: Yup.string().required('CPF is required'),
+        password: Yup.string().required('Password is required'),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
       await api.post('/ceiimport', data);
 
       toast.success('Success CEI import');
+      dispatch(openModalCEIImport(false));
     } catch (err) {
-      toast.error('Connection error');
+      console.tron.log('aqui');
+      console.tron.log(formRef);
+      const validationErrors = {};
+
+      if (err instanceof Yup.ValidationError) {
+        err.inner.forEach(error => {
+          validationErrors[error.path] = error.message;
+        });
+
+        formRef.current.setErrors(validationErrors);
+      } else {
+        toast.error('Connection error');
+      }
     }
 
-    dispatch(openModalCEIImport(false));
     setLoading(false);
   }
 
   return (
     <Container>
       {open && (
-        <Modal loading={loading} title="Importação via CEI">
-          <Form schema={schema} onSubmit={handleImport}>
+        <Modal loading={loading} title="Importation for CEI">
+          <Form ref={formRef} onSubmit={handleImport}>
             <Input
               name="cpf"
+              icon="MdPayment"
+              placeholder="Your CPF"
               autoComplete="off"
               autoFocus
-              icon="MdPayment"
-              placeholder="Seu CPF"
             />
             <Input
               name="password"
-              type="password"
               icon="MdLock"
-              placeholder="Sua senha CEI"
+              placeholder="Your CEI password"
+              type="password"
             />
-            <Button type="submit">Importar</Button>
+            <Button type="submit">Import</Button>
           </Form>
         </Modal>
       )}

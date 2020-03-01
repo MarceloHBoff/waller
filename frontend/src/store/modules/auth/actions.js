@@ -1,9 +1,9 @@
 import types from './types';
 
-export function signInRequest(email, password) {
+export function signInRequest(data) {
   return {
     type: types.SIGN_IN_REQUEST,
-    payload: { email, password },
+    payload: { data },
   };
 }
 
@@ -20,10 +20,10 @@ export function signOut() {
   };
 }
 
-export function signUpRequest(name, email, password) {
+export function signUpRequest(data) {
   return {
     type: types.SIGN_UP_REQUEST,
-    payload: { name, email, password },
+    payload: { data },
   };
 }
 

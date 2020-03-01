@@ -44,7 +44,6 @@ export const Container = styled.div`
 export const Wrapper = styled.div`
   display: flex;
   align-self: stretch;
-  justify-content: space-between;
   align-items: center;
   padding: 10px;
 

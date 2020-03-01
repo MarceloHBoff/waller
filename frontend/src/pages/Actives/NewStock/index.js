@@ -1,29 +1,27 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
-import { Form } from '@rocketseat/unform';
+import { Form } from '@unform/web';
 import * as Yup from 'yup';
 
 import Button from '~/components/Button';
 import Input from '~/components/Input';
 import Modal from '~/components/Modal';
 import api from '~/services/api';
+
 import { openModalNewStock } from '~/store/modules/modal/actions';
 import { formatPrice } from '~/util/format';
 
 import StockContext from '../context';
 import { Container } from './styles';
 
-const schema = Yup.object().shape({
-  code: Yup.string().required('Código é obrigatório'),
-  amount: Yup.string().required('Quantidade é obrigatória'),
-});
-
 export default function NewStock() {
   const open = useSelector(state => state.modal.openModalNewStock);
   const dispatch = useDispatch();
 
-  const [averagePrice, setAveragePrice] = useState(0);
+  const formRef = useRef(null);
+
   const [loading, setLoading] = useState(false);
 
   const { stocks, setStocks } = useContext(StockContext);
@@ -31,55 +29,73 @@ export default function NewStock() {
   async function handleAddStock(data) {
     setLoading(true);
 
-    const response = await api.post('/stocks', {
-      ...data,
-      averagePrice,
-    });
+    try {
+      formRef.current.setErrors({});
 
-    const stocksData = stocks;
+      const schema = Yup.object().shape({
+        code: Yup.string().required('Code is required'),
+        amount: Yup.string().required('Amount is required'),
+        averagePrice: Yup.string().required('Average price is required'),
+      });
 
-    stocksData.push({
-      ...response.data,
-      price: formatPrice(response.data.price),
-      averagePrice: formatPrice(response.data.averagePrice),
-    });
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      const response = await api.post('/stocks', data);
+
+      const stocksData = stocks;
+
+      stocksData.push({
+        ...response.data,
+        price: formatPrice(response.data.price),
+        averagePrice: formatPrice(response.data.averagePrice),
+      });
+
+      setStocks(stocksData);
+      dispatch(openModalNewStock(false));
+    } catch (err) {
+      const validationErrors = {};
+
+      if (err instanceof Yup.ValidationError) {
+        err.inner.forEach(error => {
+          validationErrors[error.path] = error.message;
+        });
+
+        formRef.current.setErrors(validationErrors);
+      } else {
+        toast.error('Connection error');
+      }
+    }
 
     setLoading(false);
-
-    dispatch(openModalNewStock(false));
-
-    setStocks(stocksData);
   }
 
   return (
     <Container>
       {open && (
         <Modal loading={loading} title="Adicionar ação">
-          <Form
-            schema={schema}
-            onSubmit={data => handleAddStock(data, averagePrice)}
-          >
+          <Form ref={formRef} onSubmit={handleAddStock}>
             <Input
               className="code"
               name="code"
-              autoComplete="off"
               icon="MdAccountBalanceWallet"
+              placeholder="Code stock"
+              autoComplete="off"
               autoFocus
-              placeholder="Código da ação"
             />
             <Input
               money
               name="averagePrice"
               icon="MdAttachMoney"
-              placeholder="Preço de compra"
-              onValueChange={value => setAveragePrice(value.value)}
+              placeholder="Buy price"
             />
             <Input
               name="amount"
               icon="MdStyle"
+              placeholder="Amount"
               type="number"
               autoComplete="off"
-              placeholder="Quantidade compra"
             />
             <Button type="submit">Add</Button>
           </Form>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdEdit } from 'react-icons/md';
 import Loader from 'react-loader-spinner';
 import PerfectScrollBar from 'react-perfect-scrollbar';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,12 +23,14 @@ const headCells = [
   { id: 'dueDate', class: 'c4', label: 'DUE DATE' },
   { id: 'nowValue', class: 'c5', label: 'NOW' },
   { id: 'result', class: 'c6', label: 'RESULT' },
+  { id: 'icons', class: 'c7', label: '' },
 ];
 
 export default function Bond() {
   const dispatch = useDispatch();
   const openModal = useSelector(state => state.modal.openModalBond);
 
+  const [data, setData] = useState({});
   const [bonds, setBonds] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('title');
@@ -70,6 +72,12 @@ export default function Bond() {
     loadBonds();
   }, [openModal]);
 
+  function handleUpdate(id) {
+    const bond = bonds.filter(bond => bond.id === id);
+    setData(bond[0]);
+    dispatch(openModalBond(true));
+  }
+
   return (
     <Container>
       {loading ? (
@@ -106,6 +114,11 @@ export default function Bond() {
                     <ColorTd className="c6" money signal={bond.nowRentability}>
                       {bond.nowValue - bond.value}
                     </ColorTd>
+                    <Td className="c7">
+                      <button onClick={() => handleUpdate(bond.id)}>
+                        <MdEdit size={24} color="#fff" />
+                      </button>
+                    </Td>
                   </tr>
                 ))}
               </tbody>
@@ -128,15 +141,16 @@ export default function Bond() {
                 <ColorTd className="c6" money signal={totals.result}>
                   {totals.result}
                 </ColorTd>
+                <Td className="c7" />
               </tr>
             </tbody>
           </Table>
-          <Accept />
           <AddButtonWrapper>
             <AddButton onClick={() => dispatch(openModalBond(true))}>
               <MdAdd size={50} color="#fff" />
             </AddButton>
           </AddButtonWrapper>
+          <Accept data={data} />
         </TableContext.Provider>
       )}
     </Container>

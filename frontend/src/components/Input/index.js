@@ -1,97 +1,24 @@
-import React, { useRef, useEffect, useState } from 'react';
-import ReactDatePicker from 'react-datepicker';
-import * as MaterialDesign from 'react-icons/md';
-import NumberFormat from 'react-number-format';
-
-import { useField } from '@rocketseat/unform';
+import React from 'react';
 import PropTypes from 'prop-types';
 
-import dark from '~/styles/dark';
+import { Container } from './styles';
 
-import { Container, Wrapper } from './styles';
+import DatePicker from '~/components/Input/DatePicker';
+import NormalInput from '~/components/Input/NormalInput';
+import Number from '~/components/Input/Number';
 
-export default function Input({
-  name,
-  icon,
-  money,
-  date,
-  percent,
-  children,
-  ...rest
-}) {
-  const ref = useRef(null);
-  const { fieldName, registerField, defaultValue, error } = useField(name);
-
-  const [dateSelected, setDateSelected] = useState(defaultValue);
-
-  const Icon = MaterialDesign[icon];
-
-  useEffect(() => {
-    if (!ref.current) return;
-    registerField({
-      name: fieldName,
-      ref: ref.current,
-      path: 'value',
-    });
-  }, [ref.current, fieldName]); //eslint-disable-line
-
+export default function Input({ name, money, date, children, ...rest }) {
   return (
     <Container>
-      {error && <span>{error}</span>}
+      {money && <Number name={name} className="numberFormat" {...rest} />}
 
-      <Wrapper>
-        {icon && <Icon size={26} color={dark.blue} />}
+      {date && (
+        <DatePicker name={name} placeholderText={rest.placeholder} {...rest} />
+      )}
 
-        {(money || percent) && (
-          <NumberFormat
-            name={fieldName}
-            id={fieldName}
-            aria-label={fieldName}
-            defaultValue={defaultValue}
-            className="numberFormat"
-            thousandSeparator="."
-            decimalSeparator=","
-            prefix={money ? 'R$ ' : ''}
-            suffix={percent ? ' %' : ''}
-            decimalScale={2}
-            autoComplete="off"
-            ref={ref}
-            {...rest}
-          />
-        )}
+      {!money && !date && <NormalInput name={name} {...rest} />}
 
-        {date && (
-          <ReactDatePicker
-            name={fieldName}
-            className="dale"
-            selected={dateSelected}
-            onChange={data => setDateSelected(data)}
-            placeholderText={rest.placeholder}
-            dateFormat="dd/MM/yyyy"
-            autoComplete="off"
-            ref={ref}
-            withPortal
-            fixedHeight
-            peekNextMonth
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
-            {...rest}
-          />
-        )}
-
-        {!money && !percent && !date && (
-          <input
-            name={fieldName}
-            id={fieldName}
-            aria-label={fieldName}
-            defaultValue={defaultValue}
-            ref={ref}
-            {...rest}
-          />
-        )}
-        {children}
-      </Wrapper>
+      {children}
     </Container>
   );
 }
@@ -101,12 +28,10 @@ Input.propTypes = {
   money: PropTypes.bool,
   percent: PropTypes.bool,
   date: PropTypes.bool,
-  icon: PropTypes.string,
   children: PropTypes.element,
 };
 
 Input.defaultProps = {
-  icon: '',
   money: false,
   percent: false,
   date: false,
