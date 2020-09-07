@@ -21,7 +21,13 @@ async function getDividends(html) {
       $(row)
         .find('span')
         .each((ic, cell) => {
-          years.push(Number($(cell).text().trim()));
+          years.push(
+            Number(
+              $(cell)
+                .text()
+                .trim()
+            )
+          );
         });
     });
 
@@ -40,7 +46,13 @@ async function getDividends(html) {
             dividends.push({
               month,
               year: years[year],
-              value: Number($(cell).find('span').first().text().trim()),
+              value: Number(
+                $(cell)
+                  .find('span')
+                  .first()
+                  .text()
+                  .trim()
+              ),
             });
 
             year++;
@@ -72,10 +84,6 @@ export default async function FIICrawler(fiiArray) {
   } catch (err) {
     return false;
   }
-
-  const html = await page.content();
-
-  if (!html) return false;
 
   const dividends = [];
 

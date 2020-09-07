@@ -87,31 +87,31 @@ export default function PieMap() {
 
     switch (d.name) {
       case 'Stock':
-        data.stocks.forEach(s => {
-          if (s.Stock.type === 'Stock') {
+        data.actives.forEach(s => {
+          if (s.Active.type === 'Stock') {
             tree.push({
-              name: s.Stock.code,
-              value: s.Stock.price * s.amount,
+              name: s.Active.code,
+              value: s.Active.price * s.amount,
             });
           }
         });
         break;
       case "FII's":
-        data.stocks.forEach(s => {
-          if (s.Stock.type === 'FII') {
+        data.actives.forEach(s => {
+          if (s.Active.type === 'FII') {
             tree.push({
-              name: s.Stock.code,
-              value: s.Stock.price * s.amount,
+              name: s.Active.code,
+              value: s.Active.price * s.amount,
             });
           }
         });
         break;
       case "ETF's":
-        data.stocks.forEach(s => {
-          if (s.Stock.type === 'ETF') {
+        data.actives.forEach(s => {
+          if (s.Active.type === 'ETF') {
             tree.push({
-              name: s.Stock.code,
-              value: s.Stock.price * s.amount,
+              name: s.Active.code,
+              value: s.Active.price * s.amount,
             });
           }
         });
@@ -119,7 +119,7 @@ export default function PieMap() {
       case 'Bonds':
         data.bonds.forEach(bond => {
           tree.push({
-            name: bond.title,
+            name: bond.Active.name,
             value: bond.nowValue,
           });
         });
@@ -149,7 +149,7 @@ export default function PieMap() {
 
   return (
     <Container>
-      <PieChart width={2000} height={1000}>
+      <PieChart width={1800} height={800}>
         <Pie
           onAnimationEnd={() => setStarted(true)}
           activeIndex={activeIndex}

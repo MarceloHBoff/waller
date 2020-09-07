@@ -1,9 +1,10 @@
 import request from 'supertest';
 
 import app from '../../src/app';
+
 import factory from './factories';
 
-export default async function login() {
+export default async function Login() {
   const user = await factory.create('User');
 
   const login = await request(app)

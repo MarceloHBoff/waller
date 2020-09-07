@@ -2,7 +2,7 @@ import PerfectScrollBar from 'react-perfect-scrollbar';
 
 import styled from 'styled-components';
 
-import { StockContainer } from './Stock/styles';
+import { ActiveContainer } from './Active/styles';
 
 export const Container = styled.div`
   display: flex;
@@ -11,7 +11,7 @@ export const Container = styled.div`
   margin: 0 auto;
 `;
 
-export const StockGrid = styled.div`
+export const ActiveGrid = styled.div`
   padding: 30px;
   display: grid;
   grid-template-columns: repeat(5, 290px);
@@ -37,7 +37,7 @@ export const StockGrid = styled.div`
   }
 `;
 
-export const NewStock = styled(StockContainer)`
+export const NewActive = styled(ActiveContainer)`
   justify-content: center;
   align-items: center;
 `;

@@ -41,6 +41,9 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     'react/jsx-props-no-spreading': 'off',
     'no-plusplus': 'off',
+    'no-console': 'off',
+    'jsx-a11y/control-has-associated-label': 'off',
+    'react/no-array-index-key': 'off',
     'import-helpers/order-imports': [
       'warn',
       {

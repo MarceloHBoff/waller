@@ -4,6 +4,7 @@ import ActiveController from './app/controllers/ActiveController';
 import BondController from './app/controllers/BondController';
 import CEIController from './app/controllers/CEIController';
 import DividendController from './app/controllers/DividendController';
+import FundamentalsController from './app/controllers/FundamentalsController';
 import SessionController from './app/controllers/SessionController';
 import UserController from './app/controllers/UserController';
 import UserDividendsController from './app/controllers/UserDividendsController';
@@ -12,6 +13,7 @@ import { ActiveGet, ActivePost } from './app/validators/Active';
 import { BondPost, BondPut, BondDelete } from './app/validators/Bond';
 import { CEIPost } from './app/validators/CEI';
 import { DividenGet, DividenPost } from './app/validators/Dividend';
+import { FundamentalsGet } from './app/validators/Fundamentals';
 import { SessionPost } from './app/validators/Session';
 import { UserPost } from './app/validators/User';
 import { UserDividend } from './app/validators/UserDividend';
@@ -42,5 +44,8 @@ routes.get('/dividends', UserDividendsController.index);
 routes.get('/dividends/:type', UserDividend, UserDividendsController.show);
 
 routes.post('/ceiimport', CEIPost, CEIController.store);
+
+routes.get('/fundamentals', FundamentalsGet, FundamentalsController.index);
+routes.post('/fundamentals', FundamentalsController.store);
 
 export default routes;

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import Loader from 'react-loader-spinner';
+import { useSelector } from 'react-redux';
 
+import Loading from '~/components/Loading';
 import separateValueTypes from '~/util/separateValueTypes';
 
 import ChartContext from './context';
 import PieMap from './PieMap';
-import { Container, NoData, Loading } from './styles';
+import { Container, NoData } from './styles';
 import TreeMap from './TreeMap';
 
 export default function Allocation() {
+  const filter = useSelector(state => state.filter.filter);
   const [data, setData] = useState([]);
   const [dataPie, setDataPie] = useState([]);
   const [dataTree, setDataTree] = useState([]);
@@ -16,39 +18,36 @@ export default function Allocation() {
 
   useEffect(() => {
     async function loadData() {
-      const {
-        stock,
-        fii,
-        etf,
-        bond,
-        stocks,
-        bonds,
-      } = await separateValueTypes();
+      setLoading(true);
+      const { data: active, actives } = await separateValueTypes(filter);
 
-      setData({ stocks, bonds });
+      const bonds = actives.filter(a => a.Active.type === 'Bond');
+      const activesData = actives.filter(a => a.Active.type !== 'Bond');
+
+      setData({ actives: activesData, bonds });
 
       const arrayData = [];
-      if (stock) arrayData.push({ name: 'Stock', value: stock });
-      if (fii) arrayData.push({ name: "FII's", value: fii });
-      if (etf) arrayData.push({ name: "ETF's", value: etf });
-      if (bond) arrayData.push({ name: 'Bonds', value: bond });
+
+      if (active.stock) arrayData.push({ name: 'Stock', value: active.stock });
+      if (active.fii) arrayData.push({ name: "FII's", value: active.fii });
+      if (active.etf) arrayData.push({ name: "ETF's", value: active.etf });
+      if (active.bond) arrayData.push({ name: 'Bonds', value: active.bond });
+
       setDataPie(arrayData);
 
       setLoading(false);
     }
 
     loadData();
-  }, []);
+  }, [filter]);
 
   return (
     <ChartContext.Provider value={{ data, dataTree, dataPie, setDataTree }}>
       {loading ? (
-        <Loading>
-          <Loader type="TailSpin" color="#fff" size={1020} />
-        </Loading>
+        <Loading />
       ) : (
         <>
-          {dataPie === [] ? (
+          {dataPie.length === 0 ? (
             <NoData>No registered assets</NoData>
           ) : (
             <Container>

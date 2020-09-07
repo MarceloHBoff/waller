@@ -3,27 +3,45 @@ import produce from 'immer';
 import types from './types';
 
 const INITIAL_STATE = {
-  openModalNewStock: false,
-  openModalCEIImport: false,
-  openModalBond: false,
+  modalNewActive: false,
+  modalCEIImport: false,
+  modalBond: false,
+  modalStockQuery: false,
+  code: '',
+  modalStockQueryChart: false,
+  modalStockQueryDividends: false,
 };
 
 export default function Modal(state = INITIAL_STATE, action) {
   return produce(state, draft => {
     switch (action.type) {
-      case types.OPEN_MODAL_NEWSTOCK:
-        draft.openModalNewStock = action.payload.open;
+      case types.MODAL_NEW_ACTIVE:
+        draft.modalNewActive = action.payload.open;
         break;
-      case types.OPEN_MODAL_CEIIMPORT:
-        draft.openModalCEIImport = action.payload.open;
+      case types.MODAL_CEI_IMPORT:
+        draft.modalCEIImport = action.payload.open;
         break;
-      case types.OPEN_MODAL_BOND:
-        draft.openModalBond = action.payload.open;
+      case types.MODAL_BOND:
+        draft.modalBond = action.payload.open;
+        break;
+      case types.MODAL_STOCK_QUERY:
+        draft.modalStockQuery = action.payload.open;
+        draft.code = action.payload.code;
+        break;
+      case types.MODAL_STOCK_QUERY_CHART:
+        draft.modalStockQueryChart = action.payload.open;
+        break;
+      case types.MODAL_STOCK_QUERY_DIVIDENDS:
+        draft.modalStockQueryDividends = action.payload.open;
         break;
       case types.CLOSE_ALL:
-        draft.openModalCEIImport = false;
-        draft.openModalNewStock = false;
-        draft.openModalBond = false;
+        draft.modalNewActive = false;
+        draft.modalCEIImport = false;
+        draft.modalBond = false;
+        draft.modalStockQuery = false;
+        draft.modalStockQueryChart = false;
+        draft.modalStockQueryDividends = false;
+        draft.code = '';
         break;
       default:
     }

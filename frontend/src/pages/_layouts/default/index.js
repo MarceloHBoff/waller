@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
-  MdHome,
-  MdList,
-  MdPieChart,
-  MdAccountBalance,
-  MdViewModule,
-  // MdTrendingUp,
-  MdSettings,
-} from 'react-icons/md';
+  FiHome,
+  FiAlignJustify,
+  FiPieChart,
+  FiDollarSign,
+  FiPaperclip,
+  FiGrid,
+  FiSettings,
+} from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 
 import SideNav, {
@@ -20,9 +20,11 @@ import SideNav, {
 import PropTypes from 'prop-types';
 
 import CEIImport from '~/components/CEIImport';
+import Header from '~/components/Header';
+import StockQuery from '~/components/StockQuery';
 import history from '~/services/history';
 import { signOut } from '~/store/modules/auth/actions';
-import { openModalCEIImport, closeAll } from '~/store/modules/modal/actions';
+import { modalCEIImport, closeAll } from '~/store/modules/modal/actions';
 
 import { Container, Wrapper } from './styles';
 
@@ -43,7 +45,7 @@ export default function DefaultLayout({ children }) {
           dispatch(closeAll());
 
           if (selected === '/settings/ceiimport') {
-            dispatch(openModalCEIImport(true));
+            dispatch(modalCEIImport(true));
           } else if (selected === '/settings/logout') {
             dispatch(signOut());
           } else {
@@ -55,44 +57,44 @@ export default function DefaultLayout({ children }) {
         <Nav defaultSelected={window.location.pathname}>
           <NavItem eventKey="/dashboard">
             <NavIcon style={{ marginTop: 6 }}>
-              <MdHome size={24} color="#fff" />
+              <FiHome size={24} color="#fff" />
             </NavIcon>
             <NavText style={{ color: '#fff' }}>Dashboard</NavText>
           </NavItem>
           <NavItem eventKey="/performance">
             <NavText style={{ color: '#fff' }}>Performance</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdList size={24} color="#fff" />
+              <FiAlignJustify size={24} color="#fff" />
             </NavIcon>
           </NavItem>
           <NavItem eventKey="/allocation">
             <NavText style={{ color: '#fff' }}>Allocation</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdPieChart size={24} color="#fff" />
+              <FiPieChart size={24} color="#fff" />
             </NavIcon>
           </NavItem>
           <NavItem eventKey="/actives">
             <NavText style={{ color: '#fff' }}>Actives</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdViewModule size={24} color="#fff" />
+              <FiGrid size={24} color="#fff" />
             </NavIcon>
           </NavItem>
           <NavItem eventKey="/bond">
             <NavText style={{ color: '#fff' }}>Bond</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdAccountBalance size={24} color="#fff" />
+              <FiPaperclip size={24} color="#fff" />
             </NavIcon>
           </NavItem>
-          {/* <NavItem eventKey="/daytrade">
-            <NavText style={{ color: '#fff' }}>Daytrade</NavText>
+          <NavItem eventKey="/dividends">
+            <NavText style={{ color: '#fff' }}>Dividends</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdTrendingUp size={24} color="#fff" />
+              <FiDollarSign size={24} color="#fff" />
             </NavIcon>
-          </NavItem> */}
+          </NavItem>
           <NavItem eventKey="/settings">
             <NavText style={{ color: '#fff' }}>Settings</NavText>
             <NavIcon style={{ marginTop: 6 }}>
-              <MdSettings size={24} color="#fff" />
+              <FiSettings size={24} color="#fff" />
             </NavIcon>
             <NavItem eventKey="/settings/ceiimport">
               <NavText style={{ color: '#fff', fontSize: 14 }}>
@@ -105,8 +107,10 @@ export default function DefaultLayout({ children }) {
           </NavItem>
         </Nav>
       </SideNav>
+      <Header />
       <Wrapper>{children}</Wrapper>
       <CEIImport />
+      <StockQuery />
     </Container>
   );
 }

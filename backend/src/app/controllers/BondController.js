@@ -1,8 +1,7 @@
-import { parseISO } from 'date-fns';
-
 import Active from '../models/Active';
 import UserActive from '../models/UserActive';
 
+import Cache from '../../lib/cache';
 import { getActiveBond } from '../services/activeUtils';
 
 export default {
@@ -12,7 +11,7 @@ export default {
       include: [
         {
           model: Active,
-          attributes: ['name'],
+          attributes: ['name', 'type'],
           where: {
             type: 'Bond',
           },
@@ -43,6 +42,8 @@ export default {
         },
       ],
     });
+
+    await Cache.delete(`actives:${req.userId}`);
 
     return res.json(bond[0]);
   },
@@ -76,6 +77,8 @@ export default {
       }
     );
 
+    await Cache.delete(`actives:${req.userId}`);
+
     return res.json(bond);
   },
 
@@ -94,6 +97,8 @@ export default {
     }
 
     bond.destroy();
+
+    await Cache.delete(`actives:${req.userId}`);
 
     return res.json({ ok: true });
   },

@@ -1,8 +1,10 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+  --height: 50px;
+
   margin-top: 20px;
-  height: 60px;
+  height: var(--height);
   border-radius: 10px;
   background: #ddd;
   display: flex;
@@ -25,7 +27,7 @@ export const Wrapper = styled.div`
 
   padding: 15px;
   border-radius: 10px;
-  height: 60px;
+  height: var(--height);
   width: var(--position);
   background: ${props => props.theme.chartColors[props.iColor + 3]};
   animation: grow 2s ease-out;

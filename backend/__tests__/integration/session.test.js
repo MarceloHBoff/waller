@@ -1,8 +1,8 @@
 import request from 'supertest';
 
 import app from '../../src/app';
-import truncate from '../util/truncate';
 import factory from '../util/factories';
+import truncate from '../util/truncate';
 
 describe('Session', () => {
   beforeEach(async () => {
@@ -12,7 +12,9 @@ describe('Session', () => {
   it('should be able to login in aplication', async () => {
     const user = await factory.attrs('User');
 
-    await request(app).post('/users').send(user);
+    await request(app)
+      .post('/users')
+      .send(user);
 
     const response = await request(app)
       .post('/sessions')
@@ -35,7 +37,9 @@ describe('Session', () => {
   it('should not be able to login in aplication with a wrong password', async () => {
     const user = await factory.attrs('User');
 
-    await request(app).post('/users').send(user);
+    await request(app)
+      .post('/users')
+      .send(user);
 
     const response = await request(app)
       .post('/sessions')
@@ -47,14 +51,16 @@ describe('Session', () => {
   it('should not be able to request with invalid token', async () => {
     const response = await request(app)
       .get('/actives')
-      .set('Authorization', `Bearer 123456789abcdsads45da34sa354s35`)
+      .set('Authorization', 'Bearer 123456789abcdsads45da34sa354s35')
       .send({});
 
     expect(response.status).toBe(401);
   });
 
   it('should not be able to request without token', async () => {
-    const response = await request(app).get('/actives').send({});
+    const response = await request(app)
+      .get('/actives')
+      .send({});
 
     expect(response.status).toBe(401);
   });

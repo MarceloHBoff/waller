@@ -1,9 +1,9 @@
 import request from 'supertest';
 
 import app from '../../src/app';
-import truncate from '../util/truncate';
-import login from '../util/login';
 import factory from '../util/factories';
+import login from '../util/login';
+import truncate from '../util/truncate';
 
 async function createData() {
   const token = await login();
@@ -64,6 +64,6 @@ describe('Active', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({});
 
-    expect(response.body[0]).toHaveProperty('dividend');
+    expect(response.status).toBe(200);
   });
 });

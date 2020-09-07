@@ -49,7 +49,7 @@ export const Wrapper = styled.div`
 
   border: 2px solid ${props => props.theme.input};
   background: ${props => props.theme.input};
-  border-radius: 50px;
+  border-radius: 10px;
 
   input {
     color: #fff;

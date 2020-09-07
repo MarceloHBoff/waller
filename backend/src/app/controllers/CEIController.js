@@ -3,6 +3,8 @@ import CEICrawler from '../services/CEICrawler';
 
 export default {
   async store(req, res) {
+    req.setTimeout(3000000);
+
     if (!(await CEICrawler(req))) {
       return res.status(401).json({ error: 'CEI site is unstable.' });
     }

@@ -22,6 +22,11 @@ module.exports = {
       },
       price: Sequelize.FLOAT,
       lastPrice: Sequelize.FLOAT,
+      cnpj: Sequelize.STRING,
+      description: Sequelize.STRING,
+      sector: Sequelize.STRING,
+      ri: Sequelize.STRING,
+      ipo: Sequelize.DATE,
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

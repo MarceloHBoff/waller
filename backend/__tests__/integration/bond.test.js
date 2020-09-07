@@ -1,9 +1,9 @@
 import request from 'supertest';
 
 import app from '../../src/app';
-import truncate from '../util/truncate';
 import factory from '../util/factories';
 import login from '../util/login';
+import truncate from '../util/truncate';
 
 describe('Active', () => {
   beforeEach(async () => {
@@ -71,7 +71,7 @@ describe('Active', () => {
       .send(bond);
 
     const response = await request(app)
-      .put(`/actives/bonds/99999`)
+      .put('/actives/bonds/99999')
       .set('Authorization', `Bearer ${token}`)
       .send({ ...bond, value: 5000 });
 

@@ -4,9 +4,9 @@ import storage from 'redux-persist/lib/storage';
 export default reducers => {
   const persistedReducer = persistReducer(
     {
-      key: 'stockwallet',
+      key: 'waller',
       storage,
-      whitelist: ['auth'],
+      whitelist: ['auth', 'filter'],
     },
     reducers
   );

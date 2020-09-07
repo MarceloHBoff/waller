@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import * as MaterialDesign from 'react-icons/md';
+import * as Feather from 'react-icons/fi';
 
 import { useField } from '@unform/core';
 import PropTypes from 'prop-types';
@@ -9,7 +9,7 @@ import dark from '~/styles/dark';
 import { Wrapper } from '../styles';
 
 export default function NormalInput({ name, icon, ...rest }) {
-  const Icon = MaterialDesign[icon];
+  const Icon = Feather[icon];
 
   const inputRef = useRef(null);
   const { fieldName, registerField, defaultValue, error } = useField(name);

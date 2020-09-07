@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
   position: fixed;
@@ -6,7 +6,7 @@ export const Container = styled.div`
   height: 100%;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
 
   display: flex;
   justify-content: center;
@@ -17,7 +17,15 @@ export const Content = styled.div`
   animation: in 1s backwards;
   background: ${props => props.theme.secundary};
   border-radius: 10px;
-  box-shadow: 0 30px 20px 0 #000;
+  box-shadow: 0 10px 20px 0 #000;
+
+  width: ${props => props.size}px;
+
+  ${props =>
+    props.height &&
+    css`
+      height: ${props.height}px;
+    `}
 `;
 
 export const CloseButton = styled.div`
@@ -46,7 +54,6 @@ export const Title = styled.h2`
 
 export const Wrapper = styled.div`
   padding: 40px;
-  width: ${props => (props.size === 'big' ? 600 : 400)}px;
 
   @keyframes in {
     from {

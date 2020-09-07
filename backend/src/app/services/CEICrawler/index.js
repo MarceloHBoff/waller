@@ -158,10 +158,7 @@ export default async function CEICrawler(req) {
   await page.goto(UrlNegociation);
   const options = [];
 
-  const html = await page.content();
-  const $ = cheerio.load(html);
-
-  if (!html) return false;
+  const $ = cheerio.load(await page.content());
 
   $(BrokerSelector).each((_, table) => {
     $(table)
@@ -184,25 +181,25 @@ export default async function CEICrawler(req) {
     },
   });
 
-  await page.setDefaultTimeout(5000);
+  await page.setDefaultTimeout(10000);
 
   for (let i = 0; i < options.length; i++) {
     await page.click(BrokerSelector);
     await page.keyboard.type(options[i]);
     await page.focus(SubmitSelector);
-    await page.waitFor(1000);
+    await page.waitFor(500);
     await page.click(SubmitSelector);
 
     try {
-      await page.waitFor(1000);
+      await page.waitFor(500);
       await page.waitForSelector(TableSelector);
       getDataByHTML(await page.content());
-      await page.waitFor(1000);
+      await page.waitFor(500);
     } catch (err) {}
-    await page.waitFor(1000);
+    await page.waitFor(500);
     await page.focus(SubmitSelector);
     await page.click(SubmitSelector);
-    await page.waitFor(1000);
+    await page.waitFor(500);
   }
 
   await page.goto(UrlBond);
@@ -210,7 +207,7 @@ export default async function CEICrawler(req) {
   for (let i = 0; i < options.length; i++) {
     await page.focus(BrokerSelector);
     await page.keyboard.type(options[i]);
-    await page.waitFor(1000);
+    await page.waitFor(500);
     await page.click(CountSelector);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
@@ -218,15 +215,15 @@ export default async function CEICrawler(req) {
     await page.click(SubmitSelector);
 
     try {
-      await page.waitFor(1000);
+      await page.waitFor(500);
       await page.waitForSelector(TitleTableSelector);
       getDataByHTMLBonds(await page.content());
-      await page.waitFor(1000);
+      await page.waitFor(500);
     } catch (err) {}
-    await page.waitFor(1000);
+    await page.waitFor(500);
     await page.focus(SubmitSelector);
     await page.click(SubmitSelector);
-    await page.waitFor(1000);
+    await page.waitFor(500);
   }
 
   await page.waitFor(2000);
@@ -248,6 +245,11 @@ export default async function CEICrawler(req) {
       if (actives[i].code === 'SQIA3') {
         actives[i].amount = Number(actives[i].amount * 4);
         actives[i].price = Number(actives[i].price / 4);
+      }
+
+      if (actives[i].code.substr(0, 4) === 'SAPR') {
+        actives[i].amount = Number(actives[i].amount * 3);
+        actives[i].price = Number(actives[i].price / 3);
       }
 
       if (userActive) {

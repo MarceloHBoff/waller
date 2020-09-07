@@ -25,3 +25,31 @@
 .c7 {
   width: 3%;
 }
+
+.c8 {
+  width: 6%;
+}
+
+@media only screen and (max-width: 1700px) {
+  .c6 {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 1400px) {
+  .c4 {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 1050px) {
+  .c2 {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .c3 {
+    display: none;
+  }
+}

@@ -1,6 +1,5 @@
+import { getActive } from '../../src/app/services/activeUtils';
 import truncate from '../util/truncate';
-
-import { getActive, getActiveBond } from '../../src/app/services/activeUtils';
 
 describe('Active', () => {
   beforeEach(async () => {

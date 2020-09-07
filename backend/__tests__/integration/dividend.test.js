@@ -1,11 +1,11 @@
 import request from 'supertest';
 
-import app from '../../src/app';
-import truncate from '../util/truncate';
-import login from '../util/login';
-
-import { getActive } from '../../src/app/services/activeUtils';
 import Dividend from '../../src/app/models/Dividend';
+
+import app from '../../src/app';
+import { getActive } from '../../src/app/services/activeUtils';
+import login from '../util/login';
+import truncate from '../util/truncate';
 
 describe('Active', () => {
   beforeEach(async () => {

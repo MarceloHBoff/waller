@@ -9,13 +9,13 @@ import Button from '~/components/Button';
 import Input from '~/components/Input';
 import Modal from '~/components/Modal';
 import api from '~/services/api';
-import { openModalCEIImport } from '~/store/modules/modal/actions';
+import { modalCEIImport } from '~/store/modules/modal/actions';
 
 import { Container } from './styles';
 
 export default function CEIImport() {
   const formRef = useRef(null);
-  const open = useSelector(state => state.modal.openModalCEIImport);
+  const open = useSelector(state => state.modal.modalCEIImport);
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function CEIImport() {
       await api.post('/ceiimport', data);
 
       toast.success('Success CEI import');
-      dispatch(openModalCEIImport(false));
+      dispatch(modalCEIImport(false));
     } catch (err) {
       const validationErrors = {};
 
@@ -49,7 +49,7 @@ export default function CEIImport() {
 
         formRef.current.setErrors(validationErrors);
       } else {
-        toast.error('Connection error');
+        toast.error(err.message);
       }
     }
 
@@ -63,14 +63,14 @@ export default function CEIImport() {
           <Form ref={formRef} onSubmit={handleImport}>
             <Input
               name="cpf"
-              icon="MdPayment"
+              icon="FiCreditCard"
               placeholder="Your CPF"
               autoComplete="off"
               autoFocus
             />
             <Input
               name="password"
-              icon="MdLock"
+              icon="FiLock"
               placeholder="Your CEI password"
               type="password"
             />

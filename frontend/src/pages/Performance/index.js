@@ -1,155 +1,156 @@
 import React, { useEffect, useState } from 'react';
-import Loader from 'react-loader-spinner';
-import PerfectScrollBar from 'react-perfect-scrollbar';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-import Td from '~/components/Td';
-import THead, { getSorting, stableSort } from '~/components/THead';
-import TableContext from '~/components/THead/context';
-import { Table, ColorTd, Loading } from '~/components/THead/styles';
+import Loading from '~/components/Loading';
+import {
+  Td,
+  ColorTd,
+  THead,
+  TBody,
+  TFoot,
+  Sorting,
+  TSort,
+  TableContext,
+} from '~/components/Table';
 import api from '~/services/api';
 import './table.css';
+import { activeFilter } from '~/util/array';
 
 import { Container } from './styles';
 
 const headCells = [
-  { id: 'name', class: 'c1', align: 'left', label: 'STOCK' },
+  { id: 'name', class: 'c1', align: 'left', label: 'ACTIVE' },
   { id: 'percent', class: 'c2', label: '%' },
-  { id: 'amount', class: 'c3', label: 'AMOUNT' },
+  { id: 'amount', class: 'c3', label: 'QTY' },
   { id: 'price', class: 'c4', label: 'PRICE' },
-  { id: 'value', class: 'c5', label: 'VALUE' },
-  { id: 'averagePrice', class: 'c6', label: 'AVERAGE PRICE' },
-  { id: 'result', class: 'c7', label: 'RESULT' },
-  { id: 'rentability', class: 'c8', label: 'RENTABILITY' },
+  { id: 'averagePrice', class: 'c5', label: 'AVERAGE PRICE' },
+  { id: 'averageValue', class: 'c6', label: 'AVERAGE VALUE' },
+  { id: 'value', class: 'c7', label: 'VALUE' },
+  { id: 'result', class: 'c8', label: 'RESULT' },
+  { id: 'rentability', class: 'c9', label: '% RENT.' },
 ];
 
 export default function Performance() {
-  const [stocks, setStocks] = useState([]);
+  const filter = useSelector(state => state.filter.filter);
+
+  const [actives, setActives] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
   const [values, setValues] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function loadStocks() {
+    async function loadActives() {
       setLoading(true);
       try {
-        const response = await api.get('/stocks');
-        const formatedStocks = response.data.map(s => ({
+        const response = await api.get('/actives');
+
+        const activesData = activeFilter(response.data, filter).map(s => ({
           ...s,
-          name: s.Stock.name,
-          price: s.Stock.price,
-          value: s.Stock.price * s.amount,
-          result: (s.Stock.price - s.averagePrice) * s.amount,
-          averagePrice: s.averagePrice,
-          lastPrice: s.Stock.lastPrice,
-          rentability:
-            ((s.Stock.price - s.averagePrice) / s.averagePrice) * 100,
-          diference: s.Stock.price - s.Stock.lastPrice,
+          name: s.Active.name,
+          price: s.Active.price,
+          value: s.Active.price * s.amount,
+          result: (s.Active.price - s.value) * s.amount,
+          averagePrice: s.value,
+          averageValue: s.value * s.amount,
+          lastPrice: s.Active.lastPrice,
+          rentability: ((s.Active.price - s.value) / s.value) * 100,
+          diference: s.Active.price - s.Active.lastPrice,
         }));
 
         let totalValue = 0;
-        let averagePrice = 0;
+        let averageValue = 0;
         let result = 0;
         let rentability = 0;
 
-        formatedStocks.forEach(stock => {
-          totalValue += stock.value;
-          averagePrice += stock.averagePrice;
-          result += stock.result;
-          rentability += stock.rentability / formatedStocks.length;
+        activesData.forEach(act => {
+          totalValue += act.value;
+          averageValue += act.averageValue;
+          result += act.result;
+          rentability += act.rentability / activesData.length;
         });
 
-        formatedStocks.forEach(stock => {
-          stock.percent = (stock.value / totalValue) * 100;
+        activesData.forEach(act => {
+          act.percent = (act.value / totalValue) * 100;
         });
 
         setValues({
           totalValue,
-          averagePrice,
+          averageValue,
           result,
           rentability,
         });
 
-        setStocks(formatedStocks);
+        setActives(activesData);
       } catch (err) {
-        toast.error('Connection error');
+        toast.error(err.message);
       }
 
       setLoading(false);
     }
-    loadStocks();
-  }, []);
+    loadActives();
+  }, [filter]);
 
   return (
     <Container>
       {loading ? (
-        <Loading>
-          <Loader type="TailSpin" color="#fff" size={1020} />
-        </Loading>
+        <Loading />
       ) : (
         <TableContext.Provider value={{ order, orderBy, setOrder, setOrderBy }}>
-          <Table>
-            <tbody>
-              <THead headCells={headCells} />
-            </tbody>
-          </Table>
-          <PerfectScrollBar>
-            <Table>
-              <tbody>
-                {stableSort(stocks, getSorting(order, orderBy)).map(stock => (
-                  <tr key={stock.id}>
-                    <Td className="c1" align="left">
-                      {stock.name}
-                    </Td>
-                    <Td className="c2" percent>
-                      {Number(stock.percent)}
-                    </Td>
-                    <Td className="c3">{stock.amount}</Td>
-                    <Td className="c4" money>
-                      {stock.price}
-                    </Td>
-                    <Td className="c5" money>
-                      {stock.value}
-                    </Td>
-                    <Td className="c6" money>
-                      {stock.averagePrice}
-                    </Td>
-                    <ColorTd className="c7" money signal={stock.result}>
-                      {stock.result}
-                    </ColorTd>
-                    <ColorTd className="c8" percent signal={stock.rentability}>
-                      {stock.rentability}
-                    </ColorTd>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </PerfectScrollBar>
-          <Table>
-            <tbody>
-              <tr key={1}>
-                <Td className="c1" align="center" colSpan={1}>
-                  Total
+          <THead headCells={headCells} />
+          <TBody>
+            {TSort(actives, Sorting(order, orderBy)).map(act => (
+              <tr key={act.id}>
+                <Td className="c1" align="left">
+                  {act.name}
                 </Td>
-                <Td className="c2" />
-                <Td className="c3" />
-                <Td className="c4" />
-                <Td className="c5" money colSpan={4}>
-                  {values.totalValue}
+                <Td className="c2" percent>
+                  {Number(act.percent)}
+                </Td>
+                <Td className="c3">{act.amount}</Td>
+                <Td className="c4" money>
+                  {act.price}
+                </Td>
+                <Td className="c5" money>
+                  {act.averagePrice}
                 </Td>
                 <Td className="c6" money>
-                  {values.averagePrice}
+                  {act.averageValue}
                 </Td>
-                <ColorTd className="c7" money signal={values.result}>
-                  {values.result}
+                <Td className="c7" money>
+                  {act.value}
+                </Td>
+                <ColorTd className="c8" money signal={act.result}>
+                  {act.result}
                 </ColorTd>
-                <ColorTd className="c8" percent signal={values.rentability}>
-                  {values.rentability}
+                <ColorTd className="c9" percent signal={act.rentability}>
+                  {act.rentability}
                 </ColorTd>
               </tr>
-            </tbody>
-          </Table>
+            ))}
+          </TBody>
+          <TFoot>
+            <Td className="c1" align="center">
+              Total
+            </Td>
+            <Td className="c2" />
+            <Td className="c3" />
+            <Td className="c4" />
+            <Td className="c5" />
+            <Td className="c6" money>
+              {values.averageValue}
+            </Td>
+            <Td className="c7" money>
+              {values.totalValue}
+            </Td>
+            <ColorTd className="c8" money signal={values.result}>
+              {values.result}
+            </ColorTd>
+            <ColorTd className="c9" percent signal={values.rentability}>
+              {values.rentability}
+            </ColorTd>
+          </TFoot>
         </TableContext.Provider>
       )}
     </Container>

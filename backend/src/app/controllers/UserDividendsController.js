@@ -5,14 +5,14 @@ import Active from '../models/Active';
 import Dividend from '../models/Dividend';
 import UserActive from '../models/UserActive';
 
-import Cache from '../../lib/cache';
+// import Cache from '../../lib/cache';
 import monthsName from '../../util/monthsName';
 
 export default {
   async index(req, res) {
-    const cached = await Cache.get(`dividends:index:${req.userId}`);
+    // const cached = await Cache.get(`dividends:index:${req.userId}`);
 
-    if (cached) return res.json(cached);
+    // if (cached) return res.json(cached);
 
     const dividendsMonths = [];
 
@@ -31,8 +31,12 @@ export default {
     });
 
     for (let months = 12; months >= 0; months--) {
-      const iniDate = lastDayOfMonth(subMonths(new Date(), months));
-      const finalDate = new Date(getYear(iniDate), getMonth(iniDate), 1);
+      const finalDate =
+        months === 0
+          ? new Date()
+          : lastDayOfMonth(subMonths(new Date(), months));
+
+      const iniDate = new Date(getYear(finalDate), getMonth(finalDate), 1);
 
       const dividends = [];
 
@@ -44,8 +48,10 @@ export default {
               [Op.gte]: actives[i].buyDate,
             },
             payDate: {
-              [Op.lte]: iniDate,
-              [Op.gte]: finalDate,
+              [Op.and]: {
+                [Op.gte]: iniDate,
+                [Op.lte]: finalDate,
+              },
             },
           },
         });
@@ -63,17 +69,17 @@ export default {
       });
     }
 
-    await Cache.set(`dividends:index:${req.userId}`, dividendsMonths);
+    // await Cache.set(`dividends:index:${req.userId}`, dividendsMonths);
 
     return res.json(dividendsMonths);
   },
 
   async show(req, res) {
-    const cached = await Cache.get(
-      `dividends:${req.params.type}:${req.userId}`
-    );
+    // const cached = await Cache.get(
+    //   `dividends:${req.params.type}:${req.userId}`
+    // );
 
-    if (cached) return res.json(cached);
+    // if (cached) return res.json(cached);
 
     const dividends = [];
 
@@ -112,7 +118,7 @@ export default {
       }
     }
 
-    await Cache.set(`dividends:${req.params.type}:${req.userId}`, dividends);
+    // await Cache.set(`dividends:${req.params.type}:${req.userId}`, dividends);
 
     return res.json(dividends);
   },

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import * as MaterialDesign from 'react-icons/md';
+import * as Feather from 'react-icons/fi';
 import NumberFormat from 'react-number-format';
 
 import { useField } from '@unform/core';
@@ -10,7 +10,7 @@ import dark from '~/styles/dark';
 import { Wrapper } from '../styles';
 
 export default function Number({ name, icon, ...rest }) {
-  const Icon = MaterialDesign[icon];
+  const Icon = Feather[icon];
 
   const numberRef = useRef(null);
   const { fieldName, registerField, defaultValue, error } = useField(name);

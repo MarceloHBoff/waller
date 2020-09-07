@@ -9,6 +9,11 @@ class Active extends Model {
         type: Sequelize.ENUM('ETF', 'FII', 'REIT', 'Stock', 'Bond'),
         price: Sequelize.FLOAT,
         lastPrice: Sequelize.FLOAT,
+        cnpj: Sequelize.STRING,
+        description: Sequelize.STRING,
+        sector: Sequelize.STRING,
+        ri: Sequelize.STRING,
+        ipo: Sequelize.DATE,
       },
       {
         sequelize,

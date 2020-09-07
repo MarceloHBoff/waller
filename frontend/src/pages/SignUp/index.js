@@ -52,19 +52,19 @@ export default function SignUp() {
         <img src={logo} alt="logo" />
         <Input
           name="name"
-          icon="MdPerson"
+          icon="FiUser"
           placeholder="Your complete name"
           autoFocus
         />
         <Input
           name="email"
-          icon="MdEmail"
+          icon="FiMail"
           placeholder="Your email"
           type="email"
         />
         <Input
           name="password"
-          icon="MdLock"
+          icon="FiLock"
           placeholder="Your password"
           type="password"
         />

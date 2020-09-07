@@ -1,52 +1,50 @@
 import { toast } from 'react-toastify';
 
 import api from '~/services/api';
+import { activeFilter } from '~/util/array';
 
-export default async function separateValueTypes() {
+export default async function separateValueTypes(filter) {
   try {
-    const responseStocks = await api.get('/stocks');
-    const responseBonds = await api.get('/bonds');
+    const response1 = await api.get('/actives');
+    const response2 = await api.get('/actives/bonds');
+
+    const actives = [...response1.data, ...response2.data];
 
     let investment = 0;
-    let stock = 0;
     let fii = 0;
-    let bond = 0;
     let etf = 0;
+    let stock = 0;
+    let bond = 0;
 
-    responseStocks.data.forEach(s => {
-      investment += s.averagePrice * s.amount;
-
-      switch (s.Stock.type) {
+    activeFilter(actives, filter).forEach(s => {
+      switch (s.Active.type) {
         case 'FII':
-          fii += s.Stock.price * s.amount;
+          fii += s.Active.price * s.amount;
+          investment += s.value * s.amount;
           break;
         case 'ETF':
-          etf += s.Stock.price * s.amount;
+          etf += s.Active.price * s.amount;
+          investment += s.value * s.amount;
           break;
         case 'Stock':
-          stock += s.Stock.price * s.amount;
+          stock += s.Active.price * s.amount;
+          investment += s.value * s.amount;
+          break;
+        case 'Bond':
+          bond += s.nowValue * s.amount;
+          investment += s.value * s.amount;
           break;
         default:
           break;
       }
     });
 
-    responseBonds.data.forEach(b => {
-      investment += b.value;
-      bond += b.nowValue;
-    });
-
-    return {
-      bonds: responseBonds.data,
-      stocks: responseStocks.data,
-      stock,
-      fii,
-      etf,
-      bond,
-      investment,
-    };
+    return { actives, data: { investment, fii, etf, stock, bond } };
   } catch (err) {
-    toast.error('Connection error');
-    return false;
+    toast.error(err.message);
+    return {
+      actives: [],
+      data: { investment: 0, fii: 0, etf: 0, stock: 0, bond: 0 },
+    };
   }
 }

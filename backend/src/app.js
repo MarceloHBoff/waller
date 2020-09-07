@@ -3,6 +3,7 @@ import './bootstrap';
 import { errors } from 'celebrate';
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 import Youch from 'youch';
 import 'express-async-errors';
 
@@ -21,6 +22,10 @@ class App {
   middlewares() {
     this.server.use(express.json());
     this.server.use(cors());
+    this.server.use(
+      '/logos',
+      express.static(path.resolve(__dirname, '..', 'media', 'images'))
+    );
   }
 
   routes() {

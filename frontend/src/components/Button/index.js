@@ -1,5 +1,5 @@
 import React from 'react';
-import * as FontAwesome from 'react-icons/fa';
+import * as Feather from 'react-icons/fi';
 
 import PropTypes from 'prop-types';
 
@@ -8,7 +8,7 @@ import dark from '~/styles/dark';
 import { Container } from './styles';
 
 export default function Button({ color, icon, children, ...rest }) {
-  const Icon = FontAwesome[icon];
+  const Icon = Feather[icon];
 
   return (
     <Container color={color} {...rest}>

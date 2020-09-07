@@ -11,7 +11,7 @@ export const Container = styled.button`
   line-height: 26px;
   padding: 10px 40px;
   color: #fff;
-  border-radius: 4px;
+  border-radius: 10px;
   transition: 180ms ease-in-out;
   position: relative;
   background-color: ${p => p.color};
@@ -28,7 +28,7 @@ export const Container = styled.button`
     width: 0px;
     height: 46px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+    border-radius: 10px;
     transition: all 0.5s ease-out;
   }
 

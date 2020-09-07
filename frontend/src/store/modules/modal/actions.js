@@ -1,22 +1,43 @@
 import types from './types';
 
-export function openModalNewStock(open) {
+export function modalNewActive(open) {
   return {
-    type: types.OPEN_MODAL_NEWSTOCK,
+    type: types.MODAL_NEW_ACTIVE,
     payload: { open },
   };
 }
 
-export function openModalCEIImport(open) {
+export function modalCEIImport(open) {
   return {
-    type: types.OPEN_MODAL_CEIIMPORT,
+    type: types.MODAL_CEI_IMPORT,
     payload: { open },
   };
 }
 
-export function openModalBond(open) {
+export function modalBond(open) {
   return {
-    type: types.OPEN_MODAL_BOND,
+    type: types.MODAL_BOND,
+    payload: { open },
+  };
+}
+
+export function modalStockQuery(open, code) {
+  return {
+    type: types.MODAL_STOCK_QUERY,
+    payload: { open, code },
+  };
+}
+
+export function modalStockQueryChart(open) {
+  return {
+    type: types.MODAL_STOCK_QUERY_CHART,
+    payload: { open },
+  };
+}
+
+export function modalStockQueryDividends(open) {
+  return {
+    type: types.MODAL_STOCK_QUERY_DIVIDENDS,
     payload: { open },
   };
 }

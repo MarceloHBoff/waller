@@ -4,17 +4,52 @@ import Active from '../models/Active';
 import UserActive from '../models/UserActive';
 
 import Cache from '../../lib/cache';
-import { getActive, updateActive } from '../services/activeUtils';
+import { getActive, yahoo } from '../services/activeUtils';
 
 export default {
   async index(req, res) {
-    const cached = await Cache.get(`actives:${req.userId}`);
+    // const cached = await Cache.get(`actives:${req.userId}`);
 
-    const { refresh } = req.query;
+    const { refresh = false } = req.query;
 
-    if (!refresh && cached) return res.json(cached);
+    // if (!refresh && cached) return res.json(cached);
 
-    const userActives = await UserActive.findAll({
+    if (refresh) {
+      const userActives = await UserActive.findAll({
+        where: { userId: req.userId },
+        include: [
+          {
+            model: Active,
+            where: {
+              type: { [Op.ne]: 'Bond' },
+            },
+          },
+        ],
+        raw: true,
+      });
+
+      let activeOnly = [];
+
+      userActives.forEach(ua => activeOnly.push(ua['Active.code']));
+
+      activeOnly = activeOnly.filter((el, i, arr) => i === arr.indexOf(el));
+
+      for (let i = 0; i < activeOnly.length; i++) {
+        const code = activeOnly[i];
+
+        const activeResponse = await yahoo(code);
+
+        const active = await Active.findOne({ where: { code } });
+
+        const data = active.dataValues;
+        data.price = activeResponse.regularMarketPrice;
+        data.lastPrice = activeResponse.regularMarketPreviousClose;
+
+        await Active.update(data, { where: { code } });
+      }
+    }
+
+    const activeUpdated = await UserActive.findAll({
       where: { userId: req.userId },
       attributes: ['id', 'userId', 'activeId', 'amount', 'buyDate', 'value'],
       include: [
@@ -31,7 +66,7 @@ export default {
     const activeSum = [];
     const actives = [];
 
-    userActives.forEach((ua) => {
+    activeUpdated.forEach(ua => {
       const index = ua.activeId - 1;
       if (activeSum[index] === undefined) activeSum[index] = ua;
       else {
@@ -44,27 +79,9 @@ export default {
       }
     });
 
-    activeSum.forEach((i) => actives.push(i));
+    activeSum.forEach(i => actives.push(i));
 
-    let symbols = '';
-    let i = 0;
-    const size = actives.length;
-
-    while (i < size) {
-      symbols += `${actives[i].Active.dataValues.code}.SA,`;
-      i++;
-
-      if (i % 5 === 0 && i !== 0) {
-        await updateActive(actives, size, symbols);
-        symbols = '';
-      }
-    }
-
-    if (symbols !== '') {
-      await updateActive(actives, size, symbols);
-    }
-
-    await Cache.set(`actives:${req.userId}`, actives);
+    // await Cache.set(`actives:${req.userId}`, actives);
 
     return res.json(actives);
   },
@@ -81,14 +98,12 @@ export default {
         value,
         buyDate,
       },
-      include: [
-        {
-          model: Active,
-          attributes: ['code', 'name', 'type', 'price', 'lastPrice'],
-        },
-      ],
     });
 
-    return res.status(201).json(userActive[0]);
+    const data = userActive[0].dataValues;
+
+    await Cache.delete(`actives:${req.userId}`);
+
+    return res.status(201).json({ Active: active.dataValues, ...data });
   },
 };

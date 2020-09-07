@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactDatePicker from 'react-datepicker';
-import * as MaterialDesign from 'react-icons/md';
+import * as Feather from 'react-icons/fi';
 
 import { useField } from '@unform/core';
 import PropTypes from 'prop-types';
@@ -10,7 +10,7 @@ import dark from '~/styles/dark';
 import { Wrapper } from '../styles';
 
 export default function DatePicker({ name, icon, ...rest }) {
-  const Icon = MaterialDesign[icon];
+  const Icon = Feather[icon];
 
   const datepickerRef = useRef(null);
   const { fieldName, registerField, defaultValue, error } = useField(name);

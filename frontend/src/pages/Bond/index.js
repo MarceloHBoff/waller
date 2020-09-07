@@ -1,57 +1,68 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MdAdd, MdEdit, MdDelete } from 'react-icons/md';
-import Loader from 'react-loader-spinner';
-import PerfectScrollBar from 'react-perfect-scrollbar';
+import { FiTrash2, FiEdit, FiPlus } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-import Td from '~/components/Td';
-import THead, { getSorting, stableSort } from '~/components/THead';
-import TableContext from '~/components/THead/context';
-import { Table, ColorTd, Loading } from '~/components/THead/styles';
+import Loading from '~/components/Loading';
+import {
+  Td,
+  ColorTd,
+  THead,
+  TBody,
+  TFoot,
+  Sorting,
+  TSort,
+  TableContext,
+} from '~/components/Table';
 import api from '~/services/api';
-import { openModalBond } from '~/store/modules/modal/actions';
-import './table.css';
+import { modalBond } from '~/store/modules/modal/actions';
 
+import './table.css';
 import Accept from './Accept';
 import { Container, AddButtonWrapper, AddButton, IconButton } from './styles';
 
 const headCells = [
-  { id: 'title', class: 'c1', align: 'left', label: 'TITLE' },
-  { id: 'nowRentability', class: 'c2', label: '%' },
+  { id: 'name', class: 'c1', align: 'left', label: 'NAME' },
+  { id: '%', class: 'c2', label: '%' },
   { id: 'value', class: 'c3', label: 'VALUE' },
   { id: 'dueDate', class: 'c4', label: 'DUE DATE' },
   { id: 'nowValue', class: 'c5', label: 'NOW' },
-  { id: 'result', class: 'c6', label: 'RESULT' },
-  { id: 'icons', class: 'c7', label: '' },
+  { id: '% result', class: 'c6', label: '% RESULT' },
+  { id: 'result', class: 'c7', label: 'RESULT' },
+  { id: 'icons', class: 'c8', label: '' },
 ];
 
 export default function Bond() {
   const dispatch = useDispatch();
-  const openModal = useSelector(state => state.modal.openModalBond);
+  const openModal = useSelector(state => state.modal.modalBond);
 
-  const [data, setData] = useState({});
+  const [dataBond, setDataBond] = useState({});
   const [bonds, setBonds] = useState([]);
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('title');
+  const [orderBy, setOrderBy] = useState('name');
   const [loading, setLoading] = useState(false);
   const [totals, setTotals] = useState(0);
 
   const loadBonds = useCallback(async () => {
     if (openModal) return;
 
-    setData({});
+    setDataBond({});
     setLoading(true);
 
     try {
-      const response = await api.get('/bonds');
+      const { data } = await api.get('/actives/bonds');
 
       let value = 0;
       let nowValue = 0;
 
-      response.data.forEach(bond => {
+      data.forEach(bond => {
         value += bond.value;
         nowValue += bond.nowValue;
+      });
+
+      data.forEach(bond => {
+        bond.percent = (bond.value / value) * 100;
+        bond.rentability = ((bond.nowValue - bond.value) / bond.value) * 100;
       });
 
       const result = nowValue - value;
@@ -62,9 +73,9 @@ export default function Bond() {
         result,
       });
 
-      setBonds(response.data);
+      setBonds(data);
     } catch (err) {
-      toast.error('Connection error');
+      toast.error(err.message);
     }
 
     setLoading(false);
@@ -76,95 +87,86 @@ export default function Bond() {
 
   function handleUpdate(id) {
     const bond = bonds.filter(b => b.id === id);
-    setData(bond[0]);
-    dispatch(openModalBond(true));
+
+    setDataBond(bond[0]);
+    dispatch(modalBond(true));
   }
 
   async function handleDelete(id) {
     try {
-      await api.delete(`/bonds/${id}`);
+      await api.delete(`/actives/bonds/${id}`);
       loadBonds();
     } catch (err) {
-      toast.error('Connection error');
+      toast.error(err.message);
     }
   }
 
   return (
     <Container>
       {loading ? (
-        <Loading>
-          <Loader type="TailSpin" color="#fff" size={1020} />
-        </Loading>
+        <Loading />
       ) : (
         <TableContext.Provider value={{ order, orderBy, setOrder, setOrderBy }}>
-          <Table>
-            <tbody>
-              <THead headCells={headCells} />
-            </tbody>
-          </Table>
-          <PerfectScrollBar>
-            <Table>
-              <tbody>
-                {stableSort(bonds, getSorting(order, orderBy)).map(bond => (
-                  <tr key={bond.id}>
-                    <Td className="c1" align="left">
-                      {bond.title}
-                    </Td>
-                    <Td className="c2" percent>
-                      {Number(bond.nowRentability)}
-                    </Td>
-                    <Td className="c3" money>
-                      {bond.value}
-                    </Td>
-                    <Td className="c4" date>
-                      {bond.dueDate}
-                    </Td>
-                    <ColorTd className="c5" money>
-                      {bond.nowValue}
-                    </ColorTd>
-                    <ColorTd className="c6" money signal={bond.nowRentability}>
-                      {bond.nowValue - bond.value}
-                    </ColorTd>
-                    <Td className="c7">
-                      <IconButton onClick={() => handleUpdate(bond.id)}>
-                        <MdEdit size={24} color="#fff" />
-                      </IconButton>
-                      <IconButton onClick={() => handleDelete(bond.id)}>
-                        <MdDelete size={24} color="#fff" />
-                      </IconButton>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </PerfectScrollBar>
-          <Table>
-            <tbody>
-              <tr>
-                <Td className="c1" align="center" colSpan={1}>
-                  Total
+          <THead headCells={headCells} />
+          <TBody>
+            {TSort(bonds, Sorting(order, orderBy)).map(bond => (
+              <tr key={bond.id}>
+                <Td className="c1" align="left">
+                  {bond.Active.name}
                 </Td>
-                <Td className="c2" />
-                <Td className="c3" money colSpan={2}>
-                  {totals.value}
+                <Td className="c2" percent>
+                  {bond.percent}
                 </Td>
-                <Td className="c4" />
-                <Td className="c5" money colSpan={4}>
-                  {totals.nowValue}
+                <Td className="c3" money>
+                  {bond.value}
                 </Td>
-                <ColorTd className="c6" money signal={totals.result}>
-                  {totals.result}
+                <Td className="c4" date>
+                  {bond.dueDate}
+                </Td>
+                <ColorTd className="c5" money>
+                  {bond.nowValue}
                 </ColorTd>
-                <Td className="c7" />
+                <ColorTd className="c6" percent signal={bond.rentability}>
+                  {bond.rentability}
+                </ColorTd>
+                <ColorTd className="c7" money signal={bond.rentability}>
+                  {bond.nowValue - bond.value}
+                </ColorTd>
+                <Td className="c8">
+                  <IconButton onClick={() => handleUpdate(bond.id)}>
+                    <FiEdit size={24} color="#fff" />
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(bond.id)}>
+                    <FiTrash2 size={24} color="#fff" />
+                  </IconButton>
+                </Td>
               </tr>
-            </tbody>
-          </Table>
+            ))}
+          </TBody>
+          <TFoot>
+            <Td className="c1" align="center">
+              Total
+            </Td>
+            <Td className="c2" />
+            <Td className="c3" money>
+              {totals.value}
+            </Td>
+            <Td className="c4" />
+            <Td className="c5" money>
+              {totals.nowValue}
+            </Td>
+            <Td className="c6" />
+            <ColorTd className="c7" money signal={totals.result}>
+              {totals.result}
+            </ColorTd>
+            <Td className="c8" />
+          </TFoot>
           <AddButtonWrapper>
-            <AddButton onClick={() => dispatch(openModalBond(true))}>
-              <MdAdd size={50} color="#fff" />
+            <AddButton onClick={() => dispatch(modalBond(true))}>
+              <FiPlus size={50} color="#fff" />
             </AddButton>
           </AddButtonWrapper>
-          <Accept dataBond={data} />
+          <Accept dataBond={dataBond} />
         </TableContext.Provider>
       )}
     </Container>

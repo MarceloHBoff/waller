@@ -44,5 +44,5 @@ module.exports = {
       },
     }),
 
-  down: (queryInterface) => queryInterface.dropTable('Dividends'),
+  down: queryInterface => queryInterface.dropTable('Dividends'),
 };

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -11,13 +11,13 @@ import Button from '~/components/Button';
 import Input from '~/components/Input';
 import Modal from '~/components/Modal';
 import api from '~/services/api';
-import { openModalBond } from '~/store/modules/modal/actions';
+import { modalBond } from '~/store/modules/modal/actions';
 
 import { Container } from './styles';
 
 export default function Accept({ dataBond }) {
   const formRef = useRef(null);
-  const open = useSelector(state => state.modal.openModalBond);
+  const open = useSelector(state => state.modal.modalBond);
   const dispatch = useDispatch();
 
   async function handleSave(data) {
@@ -25,7 +25,7 @@ export default function Accept({ dataBond }) {
       formRef.current.setErrors({});
 
       const schema = Yup.object().shape({
-        title: Yup.string().required('Title is required'),
+        name: Yup.string().required('Name is required'),
         value: Yup.string().required('Value is required'),
         dueDate: Yup.string().required('Due Date is required'),
         nowValue: Yup.string().required('Rentability is required'),
@@ -36,12 +36,12 @@ export default function Accept({ dataBond }) {
       });
 
       if (dataBond.id) {
-        await api.put(`/bonds/${dataBond.id}`, data);
+        await api.put(`/actives/bonds/${dataBond.id}`, data);
       } else {
-        await api.post('/bonds', data);
+        await api.post('/actives/bonds', data);
       }
 
-      dispatch(openModalBond(false));
+      dispatch(modalBond(false));
     } catch (err) {
       const validationErrors = {};
 
@@ -52,7 +52,7 @@ export default function Accept({ dataBond }) {
 
         formRef.current.setErrors(validationErrors);
       } else {
-        toast.error('Connection error');
+        toast.error(err.message);
       }
     }
   }
@@ -64,7 +64,7 @@ export default function Accept({ dataBond }) {
           <Form
             ref={formRef}
             initialData={{
-              title: dataBond.title,
+              name: dataBond.Active && dataBond.Active.name,
               value: dataBond.value,
               nowValue: dataBond.nowValue,
               dueDate: dataBond.dueDate ? parseISO(dataBond.dueDate) : '',
@@ -72,28 +72,23 @@ export default function Accept({ dataBond }) {
             onSubmit={handleSave}
           >
             <Input
-              name="title"
-              icon="MdShortText"
-              placeholder="Title"
+              name="name"
+              icon="FiType"
+              placeholder="Name"
               autoComplete="off"
               autoFocus
             />
-            <Input
-              money
-              name="value"
-              icon="MdAttachMoney"
-              placeholder="Value"
-            />
+            <Input money name="value" icon="FiDollarSign" placeholder="Value" />
             <Input
               date
               name="dueDate"
-              icon="MdDateRange"
+              icon="FiCalendar"
               placeholder="Due Date"
             />
             <Input
               money
               name="nowValue"
-              icon="MdAttachMoney"
+              icon="FiDollarSign"
               placeholder="Now value"
             />
             <Button type="submit">Save</Button>
@@ -107,7 +102,9 @@ export default function Accept({ dataBond }) {
 Accept.propTypes = {
   dataBond: PropTypes.shape({
     id: PropTypes.number,
-    title: PropTypes.string,
+    Active: PropTypes.shape({
+      name: PropTypes.string,
+    }),
     value: PropTypes.number,
     nowValue: PropTypes.number,
     dueDate: PropTypes.string,

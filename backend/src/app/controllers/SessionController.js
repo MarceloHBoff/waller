@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+
 import User from '../models/User';
+
 import AuthConfig from '../../config/auth';
 
 export default {

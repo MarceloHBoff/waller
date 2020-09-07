@@ -7,7 +7,7 @@ import '@trendmicro/react-sidenav/dist/react-sidenav.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,300&display=swap');
 
   * {
     margin: 0;
@@ -18,16 +18,21 @@ export default createGlobalStyle`
 
   html, body, #root {
     height: 100%;
+    width: 100%;
   }
 
   body {
     -webkit-font-smoothing: antialiased;
-    overflow: hidden;
   }
 
   body, input, textarea, button {
     font-size: 14px;
     font-family: Roboto, sans-serif;
+  }
+
+  table {
+    border-spacing: 0;
+    border-collapse: collapse;
   }
 
   a {

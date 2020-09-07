@@ -1,9 +1,9 @@
 import request from 'supertest';
 
 import app from '../../src/app';
-import truncate from '../util/truncate';
 import factory from '../util/factories';
 import login from '../util/login';
+import truncate from '../util/truncate';
 
 describe('Active', () => {
   beforeEach(async () => {

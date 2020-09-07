@@ -49,14 +49,14 @@ export default function SignIn() {
         <img src={logo} alt="logo" />
         <Input
           name="email"
-          icon="MdEmail"
+          icon="FiMail"
           placeholder="Your email"
           type="email"
           autoFocus
         />
         <Input
           name="password"
-          icon="MdLock"
+          icon="FiLock"
           placeholder="Your password"
           type="password"
         />

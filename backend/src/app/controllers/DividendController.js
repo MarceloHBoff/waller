@@ -1,5 +1,3 @@
-import { Op } from 'sequelize';
-
 import Active from '../models/Active';
 import Dividend from '../models/Dividend';
 

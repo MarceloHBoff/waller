@@ -28,7 +28,9 @@ export async function getDividends(code) {
   $('li').each((_, table) => {
     const data = {};
 
-    const row = $(table).text().trim();
+    const row = $(table)
+      .text()
+      .trim();
 
     const type = row.match(typeRegex)[0];
     data.type = type.substr(0, type.length - 1);
