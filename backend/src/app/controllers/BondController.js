@@ -1,64 +1,61 @@
-import * as Yup from 'yup';
 import { parseISO } from 'date-fns';
-import Bond from '../models/Bond';
 
-class BondController {
+import Active from '../models/Active';
+import UserActive from '../models/UserActive';
+
+import { getActiveBond } from '../services/activeUtils';
+
+export default {
   async index(req, res) {
-    const bonds = await Bond.findAll({
+    const userActives = await UserActive.findAll({
       where: { userId: req.userId },
+      include: [
+        {
+          model: Active,
+          attributes: ['name'],
+          where: {
+            type: 'Bond',
+          },
+        },
+      ],
     });
 
-    return res.json(bonds);
-  }
+    return res.json(userActives);
+  },
 
   async store(req, res) {
-    const schema = Yup.object().shape({
-      title: Yup.string().required(),
-      value: Yup.number().required(),
-      dueDate: Yup.date().required(),
-      nowValue: Yup.number().required(),
-    });
+    const { name, value, dueDate, nowValue } = req.body;
+    const active = await getActiveBond(name);
 
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
-    }
-
-    let bond = await Bond.findOne({
+    const bond = await UserActive.findOrCreate({
       where: {
         userId: req.userId,
-        title: req.body.title,
+        activeId: active.id,
+        amount: 1,
+        value,
+        dueDate,
+        nowValue,
       },
+      include: [
+        {
+          model: Active,
+          attributes: ['name'],
+        },
+      ],
     });
 
-    if (!bond) {
-      const data = {
-        ...req.body,
-        userId: req.userId,
-        dueDate: parseISO(req.body.dueDate),
-        nowRentability: (req.body.nowValue / req.body.value - 1) * 100,
-      };
-
-      bond = await Bond.create(data);
-    }
-
-    return res.json(bond);
-  }
+    return res.json(bond[0]);
+  },
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      title: Yup.string().required(),
-      value: Yup.number().required(),
-      dueDate: Yup.date().required(),
-      nowValue: Yup.number().required(),
-    });
+    const { id } = req.params;
+    const { name, value, dueDate, nowValue } = req.body;
 
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
-    }
+    const active = await getActiveBond(name);
 
-    const bond = await Bond.findOne({
+    const bond = await UserActive.findOne({
       where: {
-        id: req.params.id,
+        id,
         userId: req.userId,
       },
     });
@@ -67,15 +64,27 @@ class BondController {
       return res.status(400).json({ error: 'Bond does not exist' });
     }
 
-    bond.update(req.body);
+    bond.update(
+      { activeId: active.id, value, dueDate, nowValue },
+      {
+        include: [
+          {
+            model: Active,
+            attributes: ['name'],
+          },
+        ],
+      }
+    );
 
     return res.json(bond);
-  }
+  },
 
   async delete(req, res) {
-    const bond = await Bond.findOne({
+    const { id } = req.params;
+
+    const bond = await UserActive.findOne({
       where: {
-        id: req.params.id,
+        id,
         userId: req.userId,
       },
     });
@@ -86,8 +95,6 @@ class BondController {
 
     bond.destroy();
 
-    return res.json({});
-  }
-}
-
-export default new BondController();
+    return res.json({ ok: true });
+  },
+};

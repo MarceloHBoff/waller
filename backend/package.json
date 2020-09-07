@@ -1,40 +1,53 @@
 {
-  "name": "backend",
+  "name": "waller",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "seed": "sucrase-node src/seed.js",
-    "build": "sucrase ./src -d ./dist --transforms imports",
-    "start": "node dist/server.js"
-  },
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.9.0",
-    "eslint-plugin-import": "^2.20.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
-    "sequelize-cli": "^5.5.1",
-    "sucrase": "^3.12.1"
-  },
   "dependencies": {
     "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
+    "celebrate": "^12.0.1",
     "cheerio": "^1.0.0-rc.3",
     "cors": "^2.8.5",
-    "date-fns": "^2.9.0",
+    "cross-env": "^7.0.2",
+    "date-fns": "^2.11.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "ioredis": "^4.14.1",
+    "express-async-errors": "^3.1.1",
+    "ioredis": "^4.16.1",
     "jsonwebtoken": "^8.5.1",
-    "pg": "^7.17.1",
-    "pg-hstore": "^2.3.3",
-    "puppeteer": "^2.0.0",
-    "sequelize": "^5.21.3",
+    "pg": "^7.18.2",
+    "puppeteer": "^2.1.1",
+    "sequelize": "^5.21.5",
     "yahoo-finance": "^0.3.6",
-    "yup": "^0.28.0"
+    "youch": "^2.0.10"
+  },
+  "devDependencies": {
+    "@sucrase/jest-plugin": "^2.0.0",
+    "@types/jest": "^25.1.4",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-react-hooks": "^2.5.1",
+    
+    "factory-girl": "^5.0.4",
+    "faker": "^4.1.0",
+    "jest": "^25.2.3",
+    "nodemon": "^2.0.2",
+    "prettier": "^2.0.2",
+    "sequelize-cli": "^5.5.1",
+    "sqlite3": "^4.1.1",
+    "sucrase": "^3.13.0",
+    "supertest": "^4.0.2"
+  },
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "pretest": "cross-env NODE_ENV=test && sequelize db:migrate:undo:all && sequelize db:migrate",
+    "test": "cross-env NODE_ENV=test && jest --runInBand --detectOpenHandles",
+    "posttest": "cross-env NODE_ENV=test && sequelize db:migrate:undo:all"
   }
 }

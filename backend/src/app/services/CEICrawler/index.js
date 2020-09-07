@@ -1,10 +1,9 @@
-import puppeteer from 'puppeteer';
 import cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
 
-import getStock from '../getStock';
+import UserActive from '../../models/UserActive';
 
-import UserStock from '../../models/UserStock';
-import Bond from '../../models/Bond';
+import { getActive, getActiveBond } from '../activeUtils';
 
 const UsernameSelector = '#ctl00_ContentPlaceHolder1_txtLogin';
 const PasswordSelector = '#ctl00_ContentPlaceHolder1_txtSenha';
@@ -21,23 +20,22 @@ const UrlNegociation =
 const UrlBond =
   'https://cei.b3.com.br/CEI_Responsivo/extrato-tesouro-direto.aspx';
 
-const stocks = [];
-const bonds = [];
+let actives = [];
+let bonds = [];
 
 function getDataByHTML(html) {
   const $ = cheerio.load(html);
-  let charge = false;
+  let charge = true;
 
   $('.responsive').each((_, table) => {
     $(table)
       .find('tr')
       .each((ir, row) => {
-        const headLine = $(row)
-          .find('th:nth-child(1)')
+        const footLine = $(row)
           .text()
           .trim();
 
-        if (headLine === 'Cód.') charge = true;
+        if (footLine.substr(0, 13) === 'Total Compra:') charge = false;
 
         if (charge) {
           const data = {};
@@ -49,27 +47,39 @@ function getDataByHTML(html) {
                 .text()
                 .trim();
 
-              switch (ic) {
-                case 0:
-                  if (value[value.length - 1] === 'F') {
-                    data.code = value.substring(0, value.length - 1);
-                  } else {
-                    data.code = value;
-                  }
-                  break;
-                case 4:
-                  value.replace('.', '');
-                  data.price = Number(value.replace(',', '.')).toFixed(2);
-                  break;
-                case 6:
-                  data.amount = Number(value);
-                  break;
-                default:
-                  break;
+              if (value !== '') {
+                switch (ic) {
+                  case 0:
+                    data.buyDate = new Date(
+                      value.substr(6, 9),
+                      Number(value.substr(3, 2)) - 1,
+                      value.substr(0, 2)
+                    );
+                    break;
+                  case 1:
+                    data.type = value;
+                    break;
+                  case 4:
+                    if (value[value.length - 1] === 'F') {
+                      data.code = value.substring(0, value.length - 1);
+                    } else {
+                      data.code = value;
+                    }
+                    break;
+                  case 6:
+                    data.amount = Number(value);
+                    break;
+                  case 7:
+                    value.replace('.', '');
+                    data.price = Number(value.replace(',', '.')).toFixed(2);
+                    break;
+                  default:
+                    break;
+                }
               }
             });
 
-          if (Object.keys(data).length !== 0) stocks.push(data);
+          if (Object.keys(data).length !== 0) actives.push(data);
         }
       });
   });
@@ -93,12 +103,12 @@ function getDataByHTMLBonds(html) {
 
             switch (i) {
               case 0:
-                data.title = value;
+                data.name = value;
                 break;
               case 1:
                 data.dueDate = new Date(
                   value.substr(6, 9),
-                  value.substr(3, 2),
+                  Number(value.substr(3, 2)) - 1,
                   value.substr(0, 2)
                 );
                 break;
@@ -109,8 +119,6 @@ function getDataByHTMLBonds(html) {
               case 4:
                 value = value.replace('.', '');
                 data.nowValue = Number(value.replace(',', '.')).toFixed(2);
-                data.nowRentability =
-                  (Number(data.nowValue) / Number(data.value) - 1) * 100;
                 break;
               default:
                 break;
@@ -123,13 +131,16 @@ function getDataByHTMLBonds(html) {
 }
 
 export default async function CEICrawler(req) {
+  actives = [];
+  bonds = [];
+
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
 
   page.setViewport({ width: 1400, height: 800 });
-  page.setDefaultNavigationTimeout(80000);
+  page.setDefaultNavigationTimeout(100000);
 
   await page.goto(UrlLogin);
   await page.click(UsernameSelector);
@@ -166,38 +177,32 @@ export default async function CEICrawler(req) {
       });
   });
 
-  await UserStock.destroy({
+  await UserActive.destroy({
     where: {
       userId: req.userId,
       automatic: true,
     },
   });
 
-  await Bond.destroy({
-    where: {
-      userId: req.userId,
-      automatic: true,
-    },
-  });
-
-  await page.setDefaultTimeout(2000);
+  await page.setDefaultTimeout(5000);
 
   for (let i = 0; i < options.length; i++) {
     await page.click(BrokerSelector);
     await page.keyboard.type(options[i]);
     await page.focus(SubmitSelector);
-    await page.waitFor(300);
+    await page.waitFor(1000);
     await page.click(SubmitSelector);
 
     try {
-      await page.waitFor(100);
+      await page.waitFor(1000);
       await page.waitForSelector(TableSelector);
       getDataByHTML(await page.content());
+      await page.waitFor(1000);
     } catch (err) {}
-    await page.waitFor(100);
+    await page.waitFor(1000);
     await page.focus(SubmitSelector);
     await page.click(SubmitSelector);
-    await page.waitFor(500);
+    await page.waitFor(1000);
   }
 
   await page.goto(UrlBond);
@@ -205,7 +210,7 @@ export default async function CEICrawler(req) {
   for (let i = 0; i < options.length; i++) {
     await page.focus(BrokerSelector);
     await page.keyboard.type(options[i]);
-    await page.waitFor(300);
+    await page.waitFor(1000);
     await page.click(CountSelector);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
@@ -213,48 +218,66 @@ export default async function CEICrawler(req) {
     await page.click(SubmitSelector);
 
     try {
-      await page.waitFor(100);
+      await page.waitFor(1000);
       await page.waitForSelector(TitleTableSelector);
       getDataByHTMLBonds(await page.content());
+      await page.waitFor(1000);
     } catch (err) {}
-    await page.waitFor(100);
+    await page.waitFor(1000);
     await page.focus(SubmitSelector);
     await page.click(SubmitSelector);
-    await page.waitFor(500);
+    await page.waitFor(1000);
   }
 
-  for (let i = 0; i < stocks.length; i++) {
-    const stockBase = await getStock(stocks[i].code);
+  await page.waitFor(2000);
+
+  for (let i = 0; i < actives.length; i++) {
+    const active = await getActive(actives[i].code);
 
     try {
-      const userStock = await UserStock.findOne({
+      const userActive = await UserActive.findOne({
         where: {
           userId: req.userId,
-          stockId: stockBase.id,
+          activeId: active.id,
+          buyDate: actives[i].buyDate,
         },
       });
 
-      stocks[i].price = Number(stocks[i].price);
+      actives[i].price = Number(actives[i].price);
 
-      if (stocks[i].code === 'SQIA3') {
-        stocks[i].amount = Number(stocks[i].amount * 4);
-        stocks[i].price = Number(stocks[i].price / 4);
+      if (actives[i].code === 'SQIA3') {
+        actives[i].amount = Number(actives[i].amount * 4);
+        actives[i].price = Number(actives[i].price / 4);
       }
 
-      if (userStock) {
-        const amount = userStock.amount + stocks[i].amount;
-        const avP = (userStock.averagePrice + stocks[i].price) / 2;
-        await userStock.update({
+      if (userActive) {
+        let amount = 0;
+        let totalValue = 0;
+        let newTotalValue = 0;
+        let avP = 0;
+
+        if (actives[i].type === 'C') {
+          amount = userActive.amount + actives[i].amount;
+          totalValue = userActive.value * userActive.amount;
+          newTotalValue = actives[i].price * actives[i].amount;
+          avP = (totalValue + newTotalValue) / amount;
+        } else {
+          amount = userActive.amount - actives[i].amount;
+          avP = (userActive.value + actives[i].price) / 2;
+        }
+
+        await userActive.update({
           amount,
-          averagePrice: avP,
+          value: avP,
           automatic: true,
         });
       } else {
-        await UserStock.create({
+        await UserActive.create({
           userId: req.userId,
-          stockId: stockBase.id,
-          amount: stocks[i].amount,
-          averagePrice: stocks[i].price,
+          activeId: active.id,
+          amount: actives[i].amount,
+          buyDate: actives[i].buyDate,
+          value: actives[i].price,
           automatic: true,
         });
       }
@@ -263,19 +286,24 @@ export default async function CEICrawler(req) {
     }
   }
 
+  await page.waitFor(2000);
+  await browser.close();
+
   for (let i = 0; i < bonds.length; i++) {
-    await Bond.create({
-      userId: req.userId,
-      title: bonds[i].title,
-      value: bonds[i].value,
-      nowValue: bonds[i].nowValue,
-      nowRentability: bonds[i].nowRentability,
-      dueDate: bonds[i].dueDate,
-      automatic: true,
+    const active = await getActiveBond(bonds[i].name);
+
+    await UserActive.findOrCreate({
+      where: {
+        userId: req.userId,
+        activeId: active.id,
+        amount: 1,
+        value: bonds[i].value,
+        dueDate: bonds[i].dueDate,
+        nowValue: bonds[i].nowValue,
+        automatic: true,
+      },
     });
   }
-
-  await browser.close();
 
   return true;
 }

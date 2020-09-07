@@ -1,5 +1,5 @@
-import Sequelize, { Model } from 'sequelize';
 import bcrypt from 'bcryptjs';
+import Sequelize, { Model } from 'sequelize';
 
 class User extends Model {
   static init(sequelize) {
@@ -23,8 +23,7 @@ class User extends Model {
   }
 
   static associate(models) {
-    this.hasMany(models.Bond, { foreignKey: 'userId', as: 'Bonds' });
-    this.hasMany(models.UserStock, { foreignKey: 'userId', as: 'Stocks' });
+    this.hasMany(models.UserActive, { foreignKey: 'userId', as: 'Actives' });
   }
 
   checkPassword(password) {

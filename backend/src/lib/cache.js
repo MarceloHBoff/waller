@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+
 import RedisConfig from '../config/redis';
 
 class Cache {
@@ -7,10 +8,14 @@ class Cache {
   }
 
   set(key, value) {
+    if (process.env.NODE_ENV === 'test') return null;
+
     return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60);
   }
 
   async get(key) {
+    if (process.env.NODE_ENV === 'test') return null;
+
     const cached = await this.redis.get(key);
 
     return cached ? JSON.parse(cached) : null;

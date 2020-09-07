@@ -1,13 +1,13 @@
 import Sequelize from 'sequelize';
 
+import Active from '../app/models/Active';
+import Dividend from '../app/models/Dividend';
 import User from '../app/models/User';
-import Bond from '../app/models/Bond';
-import Stock from '../app/models/Stock';
-import UserStock from '../app/models/UserStock';
+import UserActive from '../app/models/UserActive';
 
 import databaseConfig from '../config/database';
 
-const models = [User, Bond, Stock, UserStock];
+const models = [Active, Dividend, UserActive, User];
 
 class Database {
   constructor() {
@@ -17,11 +17,11 @@ class Database {
 
   init() {
     this.connection = new Sequelize(databaseConfig);
-    models.map(model => model.init(this.connection));
+    models.map((model) => model.init(this.connection));
   }
 
   associate() {
-    models.forEach(model => {
+    models.forEach((model) => {
       if (model.associate) {
         model.associate(this.connection.models);
       }
